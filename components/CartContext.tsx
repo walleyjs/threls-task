@@ -1,7 +1,6 @@
 import { Product, ProductVariant } from '@/services/products';
 import React, { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 
-// --- Types ---
 export interface CartItem {
   product: Product;
   variant: ProductVariant;

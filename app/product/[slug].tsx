@@ -55,11 +55,9 @@ export default function ProductDetailsScreen() {
          if (match) setSelectedVariant(match);
        }, [selectedColor, selectedSize, product]);
 
-         // Add to cart handler
   const handleAddToCart = () => {
          if (selectedVariant) {
            dispatch({ type: 'ADD_ITEM', product: product!, variant: selectedVariant, quantity });
-           // Optionally show feedback
          }
        };
 
@@ -114,11 +112,9 @@ export default function ProductDetailsScreen() {
     );
   }
 
-  // Images
   const images = product.media.filter((m) => m.type === 'image');
   const mainImage = images[selectedImageIdx]?.conversions?.['medium-square'] || images[selectedImageIdx]?.url;
 
-  // Variant options
   const allColors = Array.from(new Set(product.product_variants.flatMap(v => v.variant_type_options.filter(opt => opt.variant_type.name.toLowerCase() === 'color').map(opt => opt.value))));
   const allSizes = Array.from(new Set(product.product_variants.flatMap(v => v.variant_type_options.filter(opt => opt.variant_type.name.toLowerCase() === 'size').map(opt => opt.value))));
 
@@ -130,7 +126,6 @@ export default function ProductDetailsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <ThemedText variant="text-xl-bold" style={styles.logo}>Pawlu's</ThemedText>
         <Pressable style={styles.cartIcon} accessibilityRole="button" accessibilityLabel="View cart">
@@ -138,11 +133,9 @@ export default function ProductDetailsScreen() {
         </Pressable>
       </View>
       <ThemedView style={styles.content}>
-        {/* Main Image */}
         {mainImage && (
           <ExpoImage source={{ uri: mainImage }} style={styles.image} contentFit="cover" accessibilityLabel={product.title} />
         )}
-        {/* Thumbnails */}
         <View style={styles.thumbnailsRow}>
           {images.map((img, idx) => {
             const thumb = img.conversions?.['medium-square'] || img.url;
@@ -159,11 +152,9 @@ export default function ProductDetailsScreen() {
             );
           })}
         </View>
-        {/* Title, Price, Description */}
         <ThemedText variant="text-2xl-bold" style={styles.name}>{product.title}</ThemedText>
         <ThemedText variant="text-xl-bold" style={styles.price}>{price}</ThemedText>
         <ThemedText variant="text-base-regular" style={styles.description}>{product.description}</ThemedText>
-        {/* Color Selector */}
         {allColors.length > 0 && (
           <View style={styles.selectorBlock}>
             <ThemedText variant="text-base-semibold" style={styles.selectorLabel}>Color</ThemedText>
@@ -182,7 +173,6 @@ export default function ProductDetailsScreen() {
             </View>
           </View>
         )}
-        {/* Size Selector */}
         {allSizes.length > 0 && (
           <View style={styles.selectorBlock}>
             <ThemedText variant="text-base-semibold" style={styles.selectorLabel}>Size</ThemedText>
@@ -201,7 +191,6 @@ export default function ProductDetailsScreen() {
             </View>
           </View>
         )}
-        {/* Quantity Selector */}
         <View style={styles.selectorBlock}>
           <ThemedText variant="text-base-semibold" style={styles.selectorLabel}>Quantity</ThemedText>
           <View style={styles.qtyRow}>
@@ -224,7 +213,6 @@ export default function ProductDetailsScreen() {
             </Pressable>
           </View>
         </View>
-        {/* Add to Bag Button */}
         <Pressable
           onPress={handleAddToCart}
           style={({ pressed }) => [styles.addToBagBtn, pressed && { opacity: 0.85 }]}
