@@ -6,11 +6,12 @@ import { ThemedView } from "@/components/ThemedView"
 import { Footer } from "@/components/ui/Footer"
 import { Header } from "@/components/ui/Header"
 import { HeartIcon } from "@/components/ui/Heart"
+import { LoadingScreen } from '@/components/ui/LoadingScreen'
 import { Colors } from "@/constants/Colors"
 import { getProductBySlug, type Product, type ProductVariant } from "@/services/products"
 import { Image as ExpoImage } from "expo-image"
 import { useLocalSearchParams } from "expo-router"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import {
   ActivityIndicator,
   Platform,
@@ -152,366 +153,370 @@ export default function ProductDetailsScreen() {
 
   if (isWide) {
     return (
-      <View style={styles.webContainer}>
-        <Header />
-        <ScrollView contentContainerStyle={styles.webScrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.webContentWrapper}>
-            <View style={styles.webProductCard}>
-              <View style={styles.webImageSection}>
-                <View style={styles.webMainImageContainer}>
-                  {mainImage ? (
-                    <ExpoImage
-                      source={{ uri: mainImage }}
-                      style={styles.webMainImage}
-                      contentFit="contain"
-                      accessibilityLabel={product.title}
-                    />
-                  ) : (
-                    <View style={[styles.webMainImage, styles.imagePlaceholder]}>
-                      <ThemedText style={styles.placeholderText}>📦</ThemedText>
-                    </View>
-                  )}
-                </View>
-
-                <View style={styles.webThumbnailRow}>
-                  {images.slice(0, 4).map((img, idx) => {
-                    const thumb = img.conversions?.["medium-square"] || img.url
-                    return (
-                      <Pressable
-                        key={img.uuid || img.url || idx}
-                        onPress={() => setSelectedImageIdx(idx)}
-                        style={[styles.webThumbnail, selectedImageIdx === idx && styles.webThumbnailSelected]}
-                        accessibilityRole="button"
-                        accessibilityLabel={`View image ${idx + 1}`}
-                      >
-                        {thumb ? (
-                          <ExpoImage source={{ uri: thumb }} style={styles.webThumbnailImage} contentFit="contain" />
-                        ) : (
-                          <View style={styles.thumbnailPlaceholder}>
-                            <ThemedText style={styles.thumbnailPlaceholderText}>📦</ThemedText>
-                          </View>
-                        )}
-                      </Pressable>
-                    )
-                  })}
-                </View>
-              </View>
-
-              <View style={styles.webInfoSection}>
-                <ThemedText variant="text-xl-semibold" style={styles.webTitle}>
-                  {product.title}
-                </ThemedText>
-
-                <ThemedText variant="text-xl-medium" style={styles.webPrice}>
-                  {price}
-                </ThemedText>
-
-                <ThemedText variant="text-sm-regular" style={styles.webDescription}>
-                  {product.description ||
-                    "Discover the joy of farm-fresh asparagus – tender, flavorful, and oh-so-versatile! Whether lightly roasted, grilled to perfection, or simply sautéed, let this vibrant veggie elevate your meals with its delicious taste and nutritional goodness."}
-                </ThemedText>
-
-                {/* Color selection if available */}
-                {allColors.length > 0 && (
-                  <View style={styles.webColorSection}>
-                    <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
-                      Color
-                    </ThemedText>
-                    <View style={styles.webColorOptions}>
-                      {allColors.map((color) => (
-                        <Pressable
-                          key={color}
-                          style={[styles.webColorOption, selectedColor === color && styles.webColorOptionSelected]}
-                          onPress={() => setSelectedColor(color)}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Select color ${color}`}
-                        >
-                          <View style={[styles.webColorCircle, { backgroundColor: color.toLowerCase() }]} />
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                {allSizes.length > 0 && (
-                  <View style={styles.webSizeSection}>
-                    <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
-                      Size
-                    </ThemedText>
-                    <View style={styles.webSizeOptions}>
-                      {allSizes.map((size) => (
-                        <Pressable
-                          key={size}
-                          style={[styles.webSizeOption, selectedSize === size && styles.webSizeOptionSelected]}
-                          onPress={() => setSelectedSize(size)}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Select size ${size}`}
-                        >
-                          <ThemedText style={[styles.webSizeText, selectedSize === size && styles.webSizeTextSelected]}>
-                            {size}
-                          </ThemedText>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                <View style={styles.webQuantitySection}>
-                  <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
-                    Quantity
-                  </ThemedText>
-                  <View style={styles.webQuantityContainer}>
-                    <Pressable
-                      onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                      style={styles.webQuantityButton}
-                      accessibilityRole="button"
-                      accessibilityLabel="Decrease quantity"
-                    >
-                      <ThemedText style={styles.webQuantityButtonText}>−</ThemedText>
-                    </Pressable>
-
-                    <View style={styles.webQuantityInputContainer}>
-                      <TextInput
-                        value={quantity.toString()}
-                        onChangeText={(text) => {
-                          const num = Number.parseInt(text, 10)
-                          if (!isNaN(num) && num > 0) {
-                            setQuantity(num)
-                          } else if (text === "") {
-                            setQuantity(1)
-                          }
-                        }}
-                        keyboardType="numeric"
-                        style={styles.webQuantityInput}
-                        accessibilityLabel="Quantity"
+      <Suspense fallback={<LoadingScreen />}>
+        <View style={styles.webContainer}>
+          <Header />
+          <ScrollView contentContainerStyle={styles.webScrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.webContentWrapper}>
+              <View style={styles.webProductCard}>
+                <View style={styles.webImageSection}>
+                  <View style={styles.webMainImageContainer}>
+                    {mainImage ? (
+                      <ExpoImage
+                        source={{ uri: mainImage }}
+                        style={styles.webMainImage}
+                        contentFit="contain"
+                        accessibilityLabel={product.title}
                       />
-                      <View style={styles.webQuantityArrows}>
+                    ) : (
+                      <View style={[styles.webMainImage, styles.imagePlaceholder]}>
+                        <ThemedText style={styles.placeholderText}>📦</ThemedText>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.webThumbnailRow}>
+                    {images.slice(0, 4).map((img, idx) => {
+                      const thumb = img.conversions?.["medium-square"] || img.url
+                      return (
                         <Pressable
-                          onPress={() => setQuantity((q) => q + 1)}
-                          style={styles.webQuantityArrowButton}
+                          key={img.uuid || img.url || idx}
+                          onPress={() => setSelectedImageIdx(idx)}
+                          style={[styles.webThumbnail, selectedImageIdx === idx && styles.webThumbnailSelected]}
                           accessibilityRole="button"
-                          accessibilityLabel="Increase quantity"
+                          accessibilityLabel={`View image ${idx + 1}`}
                         >
-                          <ThemedText style={styles.webQuantityArrowText}>▲</ThemedText>
+                          {thumb ? (
+                            <ExpoImage source={{ uri: thumb }} style={styles.webThumbnailImage} contentFit="contain" />
+                          ) : (
+                            <View style={styles.thumbnailPlaceholder}>
+                              <ThemedText style={styles.thumbnailPlaceholderText}>📦</ThemedText>
+                            </View>
+                          )}
                         </Pressable>
-                        <Pressable
-                          onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                          style={styles.webQuantityArrowButton}
-                          accessibilityRole="button"
-                          accessibilityLabel="Decrease quantity"
-                        >
-                          <ThemedText style={styles.webQuantityArrowText}>▼</ThemedText>
-                        </Pressable>
+                      )
+                    })}
+                  </View>
+                </View>
+
+                <View style={styles.webInfoSection}>
+                  <ThemedText variant="text-xl-semibold" style={styles.webTitle}>
+                    {product.title}
+                  </ThemedText>
+
+                  <ThemedText variant="text-xl-medium" style={styles.webPrice}>
+                    {price}
+                  </ThemedText>
+
+                  <ThemedText variant="text-sm-regular" style={styles.webDescription}>
+                    {product.description ||
+                      "Discover the joy of farm-fresh asparagus – tender, flavorful, and oh-so-versatile! Whether lightly roasted, grilled to perfection, or simply sautéed, let this vibrant veggie elevate your meals with its delicious taste and nutritional goodness."}
+                  </ThemedText>
+
+                  {/* Color selection if available */}
+                  {allColors.length > 0 && (
+                    <View style={styles.webColorSection}>
+                      <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
+                        Color
+                      </ThemedText>
+                      <View style={styles.webColorOptions}>
+                        {allColors.map((color) => (
+                          <Pressable
+                            key={color}
+                            style={[styles.webColorOption, selectedColor === color && styles.webColorOptionSelected]}
+                            onPress={() => setSelectedColor(color)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Select color ${color}`}
+                          >
+                            <View style={[styles.webColorCircle, { backgroundColor: color.toLowerCase() }]} />
+                          </Pressable>
+                        ))}
                       </View>
                     </View>
+                  )}
+
+                  {allSizes.length > 0 && (
+                    <View style={styles.webSizeSection}>
+                      <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
+                        Size
+                      </ThemedText>
+                      <View style={styles.webSizeOptions}>
+                        {allSizes.map((size) => (
+                          <Pressable
+                            key={size}
+                            style={[styles.webSizeOption, selectedSize === size && styles.webSizeOptionSelected]}
+                            onPress={() => setSelectedSize(size)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Select size ${size}`}
+                          >
+                            <ThemedText style={[styles.webSizeText, selectedSize === size && styles.webSizeTextSelected]}>
+                              {size}
+                            </ThemedText>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  <View style={styles.webQuantitySection}>
+                    <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
+                      Quantity
+                    </ThemedText>
+                    <View style={styles.webQuantityContainer}>
+                      <Pressable
+                        onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                        style={styles.webQuantityButton}
+                        accessibilityRole="button"
+                        accessibilityLabel="Decrease quantity"
+                      >
+                        <ThemedText style={styles.webQuantityButtonText}>−</ThemedText>
+                      </Pressable>
+
+                      <View style={styles.webQuantityInputContainer}>
+                        <TextInput
+                          value={quantity.toString()}
+                          onChangeText={(text) => {
+                            const num = Number.parseInt(text, 10)
+                            if (!isNaN(num) && num > 0) {
+                              setQuantity(num)
+                            } else if (text === "") {
+                              setQuantity(1)
+                            }
+                          }}
+                          keyboardType="numeric"
+                          style={styles.webQuantityInput}
+                          accessibilityLabel="Quantity"
+                        />
+                        <View style={styles.webQuantityArrows}>
+                          <Pressable
+                            onPress={() => setQuantity((q) => q + 1)}
+                            style={styles.webQuantityArrowButton}
+                            accessibilityRole="button"
+                            accessibilityLabel="Increase quantity"
+                          >
+                            <ThemedText style={styles.webQuantityArrowText}>▲</ThemedText>
+                          </Pressable>
+                          <Pressable
+                            onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                            style={styles.webQuantityArrowButton}
+                            accessibilityRole="button"
+                            accessibilityLabel="Decrease quantity"
+                          >
+                            <ThemedText style={styles.webQuantityArrowText}>▼</ThemedText>
+                          </Pressable>
+                        </View>
+                      </View>
+
+                      <Pressable
+                        onPress={() => setQuantity((q) => q + 1)}
+                        style={styles.webQuantityButton}
+                        accessibilityRole="button"
+                        accessibilityLabel="Increase quantity"
+                      >
+                        <ThemedText style={styles.webQuantityButtonText}>+</ThemedText>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View style={styles.webActionRow}>
+                    <Pressable
+                      onPress={handleAddToCart}
+                      style={({ pressed }) => [styles.webAddToBagButton, pressed && { opacity: 0.9 }]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Add to bag"
+                    >
+                      <ThemedText variant="text-base-bold" style={styles.webAddToBagText}>
+                        Add to bag
+                      </ThemedText>
+                    </Pressable>
 
                     <Pressable
-                      onPress={() => setQuantity((q) => q + 1)}
-                      style={styles.webQuantityButton}
+                      onPress={handleWishlistToggle}
+                      style={styles.webWishlistButton}
                       accessibilityRole="button"
-                      accessibilityLabel="Increase quantity"
+                      accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                     >
-                      <ThemedText style={styles.webQuantityButtonText}>+</ThemedText>
+                      <ThemedText style={[styles.webWishlistIcon, isWishlisted && styles.webWishlistIconActive]}>
+                        {isWishlisted ? "♥" : <HeartIcon />}
+                      </ThemedText>
                     </Pressable>
                   </View>
-                </View>
-
-                {/* Action Buttons */}
-                <View style={styles.webActionRow}>
-                  <Pressable
-                    onPress={handleAddToCart}
-                    style={({ pressed }) => [styles.webAddToBagButton, pressed && { opacity: 0.9 }]}
-                    accessibilityRole="button"
-                    accessibilityLabel="Add to bag"
-                  >
-                    <ThemedText variant="text-base-bold" style={styles.webAddToBagText}>
-                      Add to bag
-                    </ThemedText>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={handleWishlistToggle}
-                    style={styles.webWishlistButton}
-                    accessibilityRole="button"
-                    accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                  >
-                    <ThemedText style={[styles.webWishlistIcon, isWishlisted && styles.webWishlistIconActive]}>
-                      {isWishlisted ? "♥" : <HeartIcon />}
-                    </ThemedText>
-                  </Pressable>
                 </View>
               </View>
             </View>
-          </View>
-          <Footer/>
-        </ScrollView>
-      </View>
+            <Footer/>
+          </ScrollView>
+        </View>
+      </Suspense>
     )
   }
 
   return (
-    <ScrollView style={styles.mobileContainer} showsVerticalScrollIndicator={false}>
-      <Header />
-      <View style={styles.mobileContent}>
-        {mainImage ? (
-          <ExpoImage
-            source={{ uri: mainImage }}
-            style={styles.mobileMainImage}
-            contentFit="cover"
-            accessibilityLabel={product.title}
-          />
-        ) : (
-          <View style={[styles.mobileMainImage, styles.imagePlaceholder]}>
-            <ThemedText style={styles.placeholderText}>📦</ThemedText>
+    <Suspense fallback={<LoadingScreen />}>
+      <ScrollView style={styles.mobileContainer} showsVerticalScrollIndicator={false}>
+        <Header />
+        <View style={styles.mobileContent}>
+          {mainImage ? (
+            <ExpoImage
+              source={{ uri: mainImage }}
+              style={styles.mobileMainImage}
+              contentFit="cover"
+              accessibilityLabel={product.title}
+            />
+          ) : (
+            <View style={[styles.mobileMainImage, styles.imagePlaceholder]}>
+              <ThemedText style={styles.placeholderText}>📦</ThemedText>
+            </View>
+          )}
+
+          <View style={styles.mobileThumbnailRow}>
+            {images.map((img, idx) => {
+              const thumb = img.conversions?.["medium-square"] || img.url
+              return (
+                <Pressable
+                  key={img.uuid || img.url || idx}
+                  onPress={() => setSelectedImageIdx(idx)}
+                  style={[styles.mobileThumbnail, selectedImageIdx === idx && styles.mobileThumbnailSelected]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View image ${idx + 1}`}
+                >
+                  {thumb ? (
+                    <ExpoImage source={{ uri: thumb }} style={styles.mobileThumbnailImage} contentFit="cover" />
+                  ) : (
+                    <View style={styles.thumbnailPlaceholder}>
+                      <ThemedText style={styles.thumbnailPlaceholderText}>📦</ThemedText>
+                    </View>
+                  )}
+                </Pressable>
+              )
+            })}
           </View>
-        )}
 
-        <View style={styles.mobileThumbnailRow}>
-          {images.map((img, idx) => {
-            const thumb = img.conversions?.["medium-square"] || img.url
-            return (
-              <Pressable
-                key={img.uuid || img.url || idx}
-                onPress={() => setSelectedImageIdx(idx)}
-                style={[styles.mobileThumbnail, selectedImageIdx === idx && styles.mobileThumbnailSelected]}
-                accessibilityRole="button"
-                accessibilityLabel={`View image ${idx + 1}`}
-              >
-                {thumb ? (
-                  <ExpoImage source={{ uri: thumb }} style={styles.mobileThumbnailImage} contentFit="cover" />
-                ) : (
-                  <View style={styles.thumbnailPlaceholder}>
-                    <ThemedText style={styles.thumbnailPlaceholderText}>📦</ThemedText>
-                  </View>
-                )}
-              </Pressable>
-            )
-          })}
-        </View>
-
-        <View style={styles.mobileInfoSection}>
-          <ThemedText variant="text-xl-semibold" style={styles.mobileTitle}>
-            {product.title}
-          </ThemedText>
-          <ThemedText variant="text-xl-medium" style={styles.mobilePrice}>
-            {price}
-          </ThemedText>
-          <ThemedText variant="text-sm-regular" style={styles.mobileDescription}>
-            {product.description}
-          </ThemedText>
-
-          {/* Color selection if available */}
-          {allColors.length > 0 && (
-            <View style={styles.mobileColorSection}>
-              <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
-                Color
-              </ThemedText>
-              <View style={styles.mobileColorOptions}>
-                {allColors.map((color) => (
-                  <Pressable
-                    key={color}
-                    style={[styles.mobileColorOption, selectedColor === color && styles.mobileColorOptionSelected]}
-                    onPress={() => setSelectedColor(color)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Select color ${color}`}
-                  >
-                    <View style={[styles.mobileColorCircle, { backgroundColor: color.toLowerCase() }]} />
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {allSizes.length > 0 && (
-            <View style={styles.mobileSizeSection}>
-              <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
-                Size
-              </ThemedText>
-              <View style={styles.mobileSizeOptions}>
-                {allSizes.map((size) => (
-                  <Pressable
-                    key={size}
-                    style={[styles.mobileSizeOption, selectedSize === size && styles.mobileSizeOptionSelected]}
-                    onPress={() => setSelectedSize(size)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Select size ${size}`}
-                  >
-                    <ThemedText style={[styles.mobileSizeText, selectedSize === size && styles.mobileSizeTextSelected]}>
-                      {size}
-                    </ThemedText>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          )}
-
-          <View style={styles.mobileQuantitySection}>
-            <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
-              Quantity
+          <View style={styles.mobileInfoSection}>
+            <ThemedText variant="text-xl-semibold" style={styles.mobileTitle}>
+              {product.title}
             </ThemedText>
-            <View style={styles.mobileQuantityContainer}>
-              <View style={styles.mobileQuantityInputWrapper}>
-                <TextInput
-                  value={quantity.toString()}
-                  onChangeText={(text) => {
-                    const num = Number.parseInt(text, 10)
-                    if (!isNaN(num) && num > 0) {
-                      setQuantity(num)
-                    } else if (text === "") {
-                      setQuantity(1)
-                    }
-                  }}
-                  keyboardType="numeric"
-                  style={styles.mobileQuantityInput}
-                  accessibilityLabel="Quantity"
-                />
-                <View style={styles.mobileQuantityArrows}>
-                  <Pressable
-                    onPress={() => setQuantity((q) => q + 1)}
-                    style={styles.mobileQuantityArrowButton}
-                    accessibilityRole="button"
-                    accessibilityLabel="Increase quantity"
-                  >
-                    <ThemedText style={styles.mobileQuantityArrowText}>▲</ThemedText>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                    style={styles.mobileQuantityArrowButton}
-                    accessibilityRole="button"
-                    accessibilityLabel="Decrease quantity"
-                  >
-                    <ThemedText style={styles.mobileQuantityArrowText}>▼</ThemedText>
-                  </Pressable>
+            <ThemedText variant="text-xl-medium" style={styles.mobilePrice}>
+              {price}
+            </ThemedText>
+            <ThemedText variant="text-sm-regular" style={styles.mobileDescription}>
+              {product.description}
+            </ThemedText>
+
+            {/* Color selection if available */}
+            {allColors.length > 0 && (
+              <View style={styles.mobileColorSection}>
+                <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
+                  Color
+                </ThemedText>
+                <View style={styles.mobileColorOptions}>
+                  {allColors.map((color) => (
+                    <Pressable
+                      key={color}
+                      style={[styles.mobileColorOption, selectedColor === color && styles.mobileColorOptionSelected]}
+                      onPress={() => setSelectedColor(color)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select color ${color}`}
+                    >
+                      <View style={[styles.mobileColorCircle, { backgroundColor: color.toLowerCase() }]} />
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {allSizes.length > 0 && (
+              <View style={styles.mobileSizeSection}>
+                <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
+                  Size
+                </ThemedText>
+                <View style={styles.mobileSizeOptions}>
+                  {allSizes.map((size) => (
+                    <Pressable
+                      key={size}
+                      style={[styles.mobileSizeOption, selectedSize === size && styles.mobileSizeOptionSelected]}
+                      onPress={() => setSelectedSize(size)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select size ${size}`}
+                    >
+                      <ThemedText style={[styles.mobileSizeText, selectedSize === size && styles.mobileSizeTextSelected]}>
+                        {size}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            <View style={styles.mobileQuantitySection}>
+              <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
+                Quantity
+              </ThemedText>
+              <View style={styles.mobileQuantityContainer}>
+                <View style={styles.mobileQuantityInputWrapper}>
+                  <TextInput
+                    value={quantity.toString()}
+                    onChangeText={(text) => {
+                      const num = Number.parseInt(text, 10)
+                      if (!isNaN(num) && num > 0) {
+                        setQuantity(num)
+                      } else if (text === "") {
+                        setQuantity(1)
+                      }
+                    }}
+                    keyboardType="numeric"
+                    style={styles.mobileQuantityInput}
+                    accessibilityLabel="Quantity"
+                  />
+                  <View style={styles.mobileQuantityArrows}>
+                    <Pressable
+                      onPress={() => setQuantity((q) => q + 1)}
+                      style={styles.mobileQuantityArrowButton}
+                      accessibilityRole="button"
+                      accessibilityLabel="Increase quantity"
+                    >
+                      <ThemedText style={styles.mobileQuantityArrowText}>▲</ThemedText>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                      style={styles.mobileQuantityArrowButton}
+                      accessibilityRole="button"
+                      accessibilityLabel="Decrease quantity"
+                    >
+                      <ThemedText style={styles.mobileQuantityArrowText}>▼</ThemedText>
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
 
-          <View style={styles.mobileActionRow}>
-            <Pressable
-              onPress={handleAddToCart}
-              style={({ pressed }) => [styles.mobileAddToBagButton, pressed && { opacity: 0.9 }]}
-              accessibilityRole="button"
-              accessibilityLabel="Add to bag"
-            >
-              <ThemedText variant="text-base-bold" style={styles.mobileAddToBagText}>
-                Add to bag
-              </ThemedText>
-            </Pressable>
-            <Pressable
-              onPress={handleWishlistToggle}
-              style={styles.mobileWishlistButton}
-              accessibilityRole="button"
-              accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <ThemedText style={[styles.mobileWishlistIcon, isWishlisted && styles.mobileWishlistIconActive]}>
-                {isWishlisted ? "♥" : <HeartIcon />}
-              </ThemedText>
-            </Pressable>
+            <View style={styles.mobileActionRow}>
+              <Pressable
+                onPress={handleAddToCart}
+                style={({ pressed }) => [styles.mobileAddToBagButton, pressed && { opacity: 0.9 }]}
+                accessibilityRole="button"
+                accessibilityLabel="Add to bag"
+              >
+                <ThemedText variant="text-base-bold" style={styles.mobileAddToBagText}>
+                  Add to bag
+                </ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleWishlistToggle}
+                style={styles.mobileWishlistButton}
+                accessibilityRole="button"
+                accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <ThemedText style={[styles.mobileWishlistIcon, isWishlisted && styles.mobileWishlistIconActive]}>
+                  {isWishlisted ? "♥" : <HeartIcon />}
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </Suspense>
   )
 }
 

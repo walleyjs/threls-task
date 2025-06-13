@@ -2,12 +2,13 @@ import { useCart } from "@/components/CartContext"
 import { ThemedText } from "@/components/ThemedText"
 import { Footer } from "@/components/ui/Footer"
 import { Header } from "@/components/ui/Header"
+import { LoadingScreen } from '@/components/ui/LoadingScreen'
 import { ShipIcon } from "@/components/ui/ShipIcon"
 import { StoreIcon } from "@/components/ui/StoreIcon"
 import { Colors } from "@/constants/Colors"
 import { type Country, europeanCountries, type State } from "@/constants/countries"
 import { useRouter } from "expo-router"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import {
   KeyboardAvoidingView,
   Modal,
@@ -325,451 +326,455 @@ export default function CheckoutScreen() {
 
   if (isWide) {
     return (
-      <View style={styles.container}>
-        <Header />
-        <ScrollView contentContainerStyle={styles.webScrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.webContentWrapper}>
-            <View style={styles.webMainContent}>
-              <View style={styles.webFormCard}>
-                <ThemedText variant="text-lg-semibold" style={styles.formTitle}>
-                  Billing Details
-                </ThemedText>
-                <View style={styles.formRow}>
-                  <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                      First name
-                    </ThemedText>
-                    <TextInput
-                      style={styles.textInputWide}
-                      value={form.firstName}
-                      onChangeText={(v) => handleChange("firstName", v)}
-                      placeholder="Enter your first name"
-                      placeholderTextColor={Colors.light.gray500}
-                    />
-                  </View>
-                  <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                      Last name
-                    </ThemedText>
-                    <TextInput
-                      style={styles.textInputWide}
-                      value={form.lastName}
-                      onChangeText={(v) => handleChange("lastName", v)}
-                      placeholder="Enter your last name"
-                      placeholderTextColor={Colors.light.gray400}
-                    />
-                  </View>
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    Company
+      <Suspense fallback={<LoadingScreen />}>
+        <View style={styles.container}>
+          <Header />
+          <ScrollView contentContainerStyle={styles.webScrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.webContentWrapper}>
+              <View style={styles.webMainContent}>
+                <View style={styles.webFormCard}>
+                  <ThemedText variant="text-lg-semibold" style={styles.formTitle}>
+                    Billing Details
                   </ThemedText>
-                  <TextInput
-                    style={styles.textInputWide}
-                    value={form.company}
-                    onChangeText={(v) => handleChange("company", v)}
-                    placeholder="Enter your company name"
-                    placeholderTextColor={Colors.light.gray400}
-                  />
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    VAT number
-                  </ThemedText>
-                  <TextInput
-                    style={styles.textInputWide}
-                    value={form.vat}
-                    onChangeText={(v) => handleChange("vat", v)}
-                    placeholder="Enter your VAT number"
-                    placeholderTextColor={Colors.light.gray400}
-                  />
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    Phone number
-                  </ThemedText>
-                  <TextInput
-                    style={styles.textInputWide}
-                    value={form.phone}
-                    onChangeText={(v) => handleChange("phone", v)}
-                    placeholder="012334455"
-                    placeholderTextColor={Colors.light.gray400}
-                    keyboardType="phone-pad"
-                  />
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    Country
-                  </ThemedText>
-                  <Pressable style={styles.selectInput} onPress={() => setShowCountryModal(true)}>
-                    <ThemedText style={styles.selectTextWide}>{getCountryName(form.country)}</ThemedText>
-                    <ThemedText style={styles.selectArrow}>▼</ThemedText>
-                  </Pressable>
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    State
-                  </ThemedText>
-                  <Pressable
-                    style={[styles.selectInput, !availableStates.length && styles.selectInputDisabled]}
-                    onPress={() => availableStates.length > 0 && setShowStateModal(true)}
-                  >
-                    <ThemedText style={[styles.selectTextWide, !availableStates.length && styles.selectTextDisabled]}>
-                      {form.state
-                        ? getStateName(form.state)
-                        : availableStates.length > 0
-                          ? "Select a state"
-                          : "No states available"}
-                    </ThemedText>
-                    {availableStates.length > 0 && <ThemedText style={styles.selectArrow}>▼</ThemedText>}
-                  </Pressable>
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    Address line 1
-                  </ThemedText>
-                  <TextInput
-                    style={styles.textInputWide}
-                    value={form.address1}
-                    onChangeText={(v) => handleChange("address1", v)}
-                    placeholder="House number and street name"
-                    placeholderTextColor={Colors.light.gray400}
-                  />
-                </View>
-                <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                    Address line 2
-                  </ThemedText>
-                  <TextInput
-                    style={styles.textInputWide}
-                    value={form.address2}
-                    onChangeText={(v) => handleChange("address2", v)}
-                    placeholder="House number and street name"
-                    placeholderTextColor={Colors.light.gray400}
-                  />
-                </View>
-                <View style={styles.formRow}>
-                  <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                      City
-                    </ThemedText>
-                    <TextInput
-                      style={styles.textInputWide}
-                      value={form.city}
-                      onChangeText={(v) => handleChange("city", v)}
-                      placeholder="City"
-                      placeholderTextColor={Colors.light.gray400}
-                    />
-                  </View>
-                  <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
-                      Zip Code
-                    </ThemedText>
-                    <TextInput
-                      style={styles.textInputWide}
-                      value={form.zip}
-                      onChangeText={(v) => handleChange("zip", v)}
-                      placeholder="Zip code"
-                      placeholderTextColor={Colors.light.gray400}
-                    />
-                  </View>
-                </View>
-                <View style={styles.deliverySection}>
-                  <ThemedText variant="text-lg-bold" style={styles.deliveryTitle}>
-                    Delivery
-                  </ThemedText>
-                  <View style={styles.deliveryOptionContainer}>
-                    <Pressable
-                      style={[styles.deliveryOption, form.delivery === "ship" && styles.deliveryOptionSelected]}
-                      onPress={() => handleChange("delivery", "ship")}
-                    >
-                      <View style={styles.radioButton}>
-                        <View style={[styles.radioOuter, form.delivery === "ship" && styles.radioOuterActive]}>
-                          {form.delivery === "ship" && <View style={styles.radioInner} />}
-                        </View>
-                      </View>
-                      <ThemedText variant="text-sm-semibold" style={styles.deliveryOptionText}>
-                        Ship
+                  <View style={styles.formRow}>
+                    <View style={styles.formFieldHalf}>
+                      <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                        First name
                       </ThemedText>
-                      <ShipIcon />
-                    </Pressable>
-
-                    <Pressable
-                      style={[
-                        styles.deliveryOption,
-                        styles.pickUpOption,
-                        form.delivery === "pickup" && styles.deliveryOptionSelected,
-                      ]}
-                      onPress={() => handleChange("delivery", "pickup")}
-                    >
-                      <View style={styles.radioButton}>
-                        <View style={[styles.radioOuter, form.delivery === "pickup" && styles.radioOuterActive]}>
-                          {form.delivery === "pickup" && <View style={styles.radioInner} />}
-                        </View>
-                      </View>
-                      <ThemedText variant="text-sm-semibold" style={styles.deliveryOptionText}>
-                        Pickup in store
-                      </ThemedText>
-                      <StoreIcon />
-                    </Pressable>
-                  </View>
-
-                  <Pressable
-                    style={styles.checkboxOption}
-                    onPress={() => handleChange("shipToDifferent", !form.shipToDifferent)}
-                  >
-                    <View style={styles.checkboxButton}>
-                      <View style={[styles.checkboxOuter, form.shipToDifferent && styles.checkboxOuterActive]}>
-                        {form.shipToDifferent && <ThemedText style={styles.checkboxCheck}>✓</ThemedText>}
-                      </View>
+                      <TextInput
+                        style={styles.textInputWide}
+                        value={form.firstName}
+                        onChangeText={(v) => handleChange("firstName", v)}
+                        placeholder="Enter your first name"
+                        placeholderTextColor={Colors.light.gray500}
+                      />
                     </View>
-                    <ThemedText style={styles.checkboxOptionText}>Ship to a different address?</ThemedText>
+                    <View style={styles.formFieldHalf}>
+                      <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                        Last name
+                      </ThemedText>
+                      <TextInput
+                        style={styles.textInputWide}
+                        value={form.lastName}
+                        onChangeText={(v) => handleChange("lastName", v)}
+                        placeholder="Enter your last name"
+                        placeholderTextColor={Colors.light.gray400}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      Company
+                    </ThemedText>
+                    <TextInput
+                      style={styles.textInputWide}
+                      value={form.company}
+                      onChangeText={(v) => handleChange("company", v)}
+                      placeholder="Enter your company name"
+                      placeholderTextColor={Colors.light.gray400}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      VAT number
+                    </ThemedText>
+                    <TextInput
+                      style={styles.textInputWide}
+                      value={form.vat}
+                      onChangeText={(v) => handleChange("vat", v)}
+                      placeholder="Enter your VAT number"
+                      placeholderTextColor={Colors.light.gray400}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      Phone number
+                    </ThemedText>
+                    <TextInput
+                      style={styles.textInputWide}
+                      value={form.phone}
+                      onChangeText={(v) => handleChange("phone", v)}
+                      placeholder="012334455"
+                      placeholderTextColor={Colors.light.gray400}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      Country
+                    </ThemedText>
+                    <Pressable style={styles.selectInput} onPress={() => setShowCountryModal(true)}>
+                      <ThemedText style={styles.selectTextWide}>{getCountryName(form.country)}</ThemedText>
+                      <ThemedText style={styles.selectArrow}>▼</ThemedText>
+                    </Pressable>
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      State
+                    </ThemedText>
+                    <Pressable
+                      style={[styles.selectInput, !availableStates.length && styles.selectInputDisabled]}
+                      onPress={() => availableStates.length > 0 && setShowStateModal(true)}
+                    >
+                      <ThemedText style={[styles.selectTextWide, !availableStates.length && styles.selectTextDisabled]}>
+                        {form.state
+                          ? getStateName(form.state)
+                          : availableStates.length > 0
+                            ? "Select a state"
+                            : "No states available"}
+                      </ThemedText>
+                      {availableStates.length > 0 && <ThemedText style={styles.selectArrow}>▼</ThemedText>}
+                    </Pressable>
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      Address line 1
+                    </ThemedText>
+                    <TextInput
+                      style={styles.textInputWide}
+                      value={form.address1}
+                      onChangeText={(v) => handleChange("address1", v)}
+                      placeholder="House number and street name"
+                      placeholderTextColor={Colors.light.gray400}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                      Address line 2
+                    </ThemedText>
+                    <TextInput
+                      style={styles.textInputWide}
+                      value={form.address2}
+                      onChangeText={(v) => handleChange("address2", v)}
+                      placeholder="House number and street name"
+                      placeholderTextColor={Colors.light.gray400}
+                    />
+                  </View>
+                  <View style={styles.formRow}>
+                    <View style={styles.formFieldHalf}>
+                      <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                        City
+                      </ThemedText>
+                      <TextInput
+                        style={styles.textInputWide}
+                        value={form.city}
+                        onChangeText={(v) => handleChange("city", v)}
+                        placeholder="City"
+                        placeholderTextColor={Colors.light.gray400}
+                      />
+                    </View>
+                    <View style={styles.formFieldHalf}>
+                      <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
+                        Zip Code
+                      </ThemedText>
+                      <TextInput
+                        style={styles.textInputWide}
+                        value={form.zip}
+                        onChangeText={(v) => handleChange("zip", v)}
+                        placeholder="Zip code"
+                        placeholderTextColor={Colors.light.gray400}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.deliverySection}>
+                    <ThemedText variant="text-lg-bold" style={styles.deliveryTitle}>
+                      Delivery
+                    </ThemedText>
+                    <View style={styles.deliveryOptionContainer}>
+                      <Pressable
+                        style={[styles.deliveryOption, form.delivery === "ship" && styles.deliveryOptionSelected]}
+                        onPress={() => handleChange("delivery", "ship")}
+                      >
+                        <View style={styles.radioButton}>
+                          <View style={[styles.radioOuter, form.delivery === "ship" && styles.radioOuterActive]}>
+                            {form.delivery === "ship" && <View style={styles.radioInner} />}
+                          </View>
+                        </View>
+                        <ThemedText variant="text-sm-semibold" style={styles.deliveryOptionText}>
+                          Ship
+                        </ThemedText>
+                        <ShipIcon />
+                      </Pressable>
+
+                      <Pressable
+                        style={[
+                          styles.deliveryOption,
+                          styles.pickUpOption,
+                          form.delivery === "pickup" && styles.deliveryOptionSelected,
+                        ]}
+                        onPress={() => handleChange("delivery", "pickup")}
+                      >
+                        <View style={styles.radioButton}>
+                          <View style={[styles.radioOuter, form.delivery === "pickup" && styles.radioOuterActive]}>
+                            {form.delivery === "pickup" && <View style={styles.radioInner} />}
+                          </View>
+                        </View>
+                        <ThemedText variant="text-sm-semibold" style={styles.deliveryOptionText}>
+                          Pickup in store
+                        </ThemedText>
+                        <StoreIcon />
+                      </Pressable>
+                    </View>
+
+                    <Pressable
+                      style={styles.checkboxOption}
+                      onPress={() => handleChange("shipToDifferent", !form.shipToDifferent)}
+                    >
+                      <View style={styles.checkboxButton}>
+                        <View style={[styles.checkboxOuter, form.shipToDifferent && styles.checkboxOuterActive]}>
+                          {form.shipToDifferent && <ThemedText style={styles.checkboxCheck}>✓</ThemedText>}
+                        </View>
+                      </View>
+                      <ThemedText style={styles.checkboxOptionText}>Ship to a different address?</ThemedText>
+                    </Pressable>
+                  </View>
+                  <Pressable
+                    style={[styles.payButton, !isFormValid() && styles.payButtonDisabled]}
+                    onPress={handlePayNow}
+                    disabled={!isFormValid()}
+                  >
+                    <ThemedText variant="text-base-bold" style={styles.payButtonText}>
+                      Pay now
+                    </ThemedText>
                   </Pressable>
                 </View>
-                <Pressable
-                  style={[styles.payButton, !isFormValid() && styles.payButtonDisabled]}
-                  onPress={handlePayNow}
-                  disabled={!isFormValid()}
-                >
-                  <ThemedText variant="text-base-bold" style={styles.payButtonText}>
-                    Pay now
-                  </ThemedText>
-                </Pressable>
+                <SummarySection />
               </View>
-              <SummarySection />
             </View>
-          </View>
-          <Footer/>
-        </ScrollView>
-        <CountrySelectionModal />
-        <StateSelectionModal />
-        <SuccessModal />
-      </View>
+            <Footer/>
+          </ScrollView>
+          <CountrySelectionModal />
+          <StateSelectionModal />
+          <SuccessModal />
+        </View>
+      </Suspense>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <Header />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboardView}>
-        <ScrollView contentContainerStyle={styles.mobileScrollContent} showsVerticalScrollIndicator={false}>
-          <SummarySection />
-          <View style={styles.mobileFormCard}>
-            <ThemedText variant="text-base-semibold" style={styles.formTitle}>
-              Billing Details
-            </ThemedText>
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                First name
+    <Suspense fallback={<LoadingScreen />}>
+      <View style={styles.container}>
+        <Header />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboardView}>
+          <ScrollView contentContainerStyle={styles.mobileScrollContent} showsVerticalScrollIndicator={false}>
+            <SummarySection />
+            <View style={styles.mobileFormCard}>
+              <ThemedText variant="text-base-semibold" style={styles.formTitle}>
+                Billing Details
               </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.firstName}
-                onChangeText={(v) => handleChange("firstName", v)}
-                placeholder="Enter your first name"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Last name
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.lastName}
-                onChangeText={(v) => handleChange("lastName", v)}
-                placeholder="Enter your last name"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Company
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.company}
-                onChangeText={(v) => handleChange("company", v)}
-                placeholder="Enter your company name"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                VAT number
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.vat}
-                onChangeText={(v) => handleChange("vat", v)}
-                placeholder="Enter your VAT number"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Phone number
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.phone}
-                onChangeText={(v) => handleChange("phone", v)}
-                placeholder="012334455"
-                placeholderTextColor={Colors.light.gray400}
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Country
-              </ThemedText>
-              <Pressable style={styles.selectInput} onPress={() => setShowCountryModal(true)}>
-                <ThemedText style={styles.selectText}>{getCountryName(form.country)}</ThemedText>
-                <ThemedText style={styles.selectArrow}>▼</ThemedText>
-              </Pressable>
-            </View>
-
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                State
-              </ThemedText>
-              <Pressable
-                style={[styles.selectInput, !availableStates.length && styles.selectInputDisabled]}
-                onPress={() => availableStates.length > 0 && setShowStateModal(true)}
-              >
-                <ThemedText style={[styles.selectText, !availableStates.length && styles.selectTextDisabled]}>
-                  {form.state
-                    ? getStateName(form.state)
-                    : availableStates.length > 0
-                      ? "Select a state"
-                      : "No states available"}
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  First name
                 </ThemedText>
-                {availableStates.length > 0 && <ThemedText style={styles.selectArrow}>▼</ThemedText>}
-              </Pressable>
-            </View>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.firstName}
+                  onChangeText={(v) => handleChange("firstName", v)}
+                  placeholder="Enter your first name"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Address line 1
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.address1}
-                onChangeText={(v) => handleChange("address1", v)}
-                placeholder="House number and street name"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Last name
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.lastName}
+                  onChangeText={(v) => handleChange("lastName", v)}
+                  placeholder="Enter your last name"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Address line 2
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.address2}
-                onChangeText={(v) => handleChange("address2", v)}
-                placeholder="House number and street name"
-                placeholderTextColor={Colors.light.gray500}
-              />
-            </View>
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Company
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.company}
+                  onChangeText={(v) => handleChange("company", v)}
+                  placeholder="Enter your company name"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                City
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.city}
-                onChangeText={(v) => handleChange("city", v)}
-                placeholder="City"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  VAT number
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.vat}
+                  onChangeText={(v) => handleChange("vat", v)}
+                  placeholder="Enter your VAT number"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
-                Zip Code
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={form.zip}
-                onChangeText={(v) => handleChange("zip", v)}
-                placeholder="Zip code"
-                placeholderTextColor={Colors.light.gray400}
-              />
-            </View>
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Phone number
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.phone}
+                  onChangeText={(v) => handleChange("phone", v)}
+                  placeholder="012334455"
+                  placeholderTextColor={Colors.light.gray400}
+                  keyboardType="phone-pad"
+                />
+              </View>
 
-            {/* Delivery Section */}
-            <View style={styles.deliverySection}>
-              <ThemedText variant="text-lg-bold" style={styles.deliveryTitle}>
-                Delivery
-              </ThemedText>
-              <View style={styles.deliveryOptionContainer}>
-                <Pressable
-                  style={[styles.deliveryOption, form.delivery === "ship" && styles.deliveryOptionSelected]}
-                  onPress={() => handleChange("delivery", "ship")}
-                >
-                  <View style={styles.radioButton}>
-                    <View style={[styles.radioOuter, form.delivery === "ship" && styles.radioOuterActive]}>
-                      {form.delivery === "ship" && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <ThemedText style={styles.deliveryOptionText}>Ship</ThemedText>
-                  <ShipIcon />
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.deliveryOption,
-                    styles.pickUpOption,
-                    form.delivery === "pickup" && styles.deliveryOptionSelected,
-                  ]}
-                  onPress={() => handleChange("delivery", "pickup")}
-                >
-                  <View style={styles.radioButton}>
-                    <View style={[styles.radioOuter, form.delivery === "pickup" && styles.radioOuterActive]}>
-                      {form.delivery === "pickup" && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <ThemedText style={styles.deliveryOptionText}>Pickup in store</ThemedText>
-                  <StoreIcon />
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Country
+                </ThemedText>
+                <Pressable style={styles.selectInput} onPress={() => setShowCountryModal(true)}>
+                  <ThemedText style={styles.selectText}>{getCountryName(form.country)}</ThemedText>
+                  <ThemedText style={styles.selectArrow}>▼</ThemedText>
                 </Pressable>
               </View>
 
-              <Pressable
-                style={styles.checkboxOption}
-                onPress={() => handleChange("shipToDifferent", !form.shipToDifferent)}
-              >
-                <View style={styles.checkboxButton}>
-                  <View style={[styles.checkboxOuter, form.shipToDifferent && styles.checkboxOuterActive]}>
-                    {form.shipToDifferent && <ThemedText style={styles.checkboxCheck}>✓</ThemedText>}
-                  </View>
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  State
+                </ThemedText>
+                <Pressable
+                  style={[styles.selectInput, !availableStates.length && styles.selectInputDisabled]}
+                  onPress={() => availableStates.length > 0 && setShowStateModal(true)}
+                >
+                  <ThemedText style={[styles.selectText, !availableStates.length && styles.selectTextDisabled]}>
+                    {form.state
+                      ? getStateName(form.state)
+                      : availableStates.length > 0
+                        ? "Select a state"
+                        : "No states available"}
+                  </ThemedText>
+                  {availableStates.length > 0 && <ThemedText style={styles.selectArrow}>▼</ThemedText>}
+                </Pressable>
+              </View>
+
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Address line 1
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.address1}
+                  onChangeText={(v) => handleChange("address1", v)}
+                  placeholder="House number and street name"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
+
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Address line 2
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.address2}
+                  onChangeText={(v) => handleChange("address2", v)}
+                  placeholder="House number and street name"
+                  placeholderTextColor={Colors.light.gray500}
+                />
+              </View>
+
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  City
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.city}
+                  onChangeText={(v) => handleChange("city", v)}
+                  placeholder="City"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
+
+              <View style={styles.formField}>
+                <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  Zip Code
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.zip}
+                  onChangeText={(v) => handleChange("zip", v)}
+                  placeholder="Zip code"
+                  placeholderTextColor={Colors.light.gray400}
+                />
+              </View>
+
+              {/* Delivery Section */}
+              <View style={styles.deliverySection}>
+                <ThemedText variant="text-lg-bold" style={styles.deliveryTitle}>
+                  Delivery
+                </ThemedText>
+                <View style={styles.deliveryOptionContainer}>
+                  <Pressable
+                    style={[styles.deliveryOption, form.delivery === "ship" && styles.deliveryOptionSelected]}
+                    onPress={() => handleChange("delivery", "ship")}
+                  >
+                    <View style={styles.radioButton}>
+                      <View style={[styles.radioOuter, form.delivery === "ship" && styles.radioOuterActive]}>
+                        {form.delivery === "ship" && <View style={styles.radioInner} />}
+                      </View>
+                    </View>
+                    <ThemedText style={styles.deliveryOptionText}>Ship</ThemedText>
+                    <ShipIcon />
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.deliveryOption,
+                      styles.pickUpOption,
+                      form.delivery === "pickup" && styles.deliveryOptionSelected,
+                    ]}
+                    onPress={() => handleChange("delivery", "pickup")}
+                  >
+                    <View style={styles.radioButton}>
+                      <View style={[styles.radioOuter, form.delivery === "pickup" && styles.radioOuterActive]}>
+                        {form.delivery === "pickup" && <View style={styles.radioInner} />}
+                      </View>
+                    </View>
+                    <ThemedText style={styles.deliveryOptionText}>Pickup in store</ThemedText>
+                    <StoreIcon />
+                  </Pressable>
                 </View>
-                <ThemedText style={styles.checkboxOptionText}>Ship to a different address?</ThemedText>
+
+                <Pressable
+                  style={styles.checkboxOption}
+                  onPress={() => handleChange("shipToDifferent", !form.shipToDifferent)}
+                >
+                  <View style={styles.checkboxButton}>
+                    <View style={[styles.checkboxOuter, form.shipToDifferent && styles.checkboxOuterActive]}>
+                      {form.shipToDifferent && <ThemedText style={styles.checkboxCheck}>✓</ThemedText>}
+                    </View>
+                  </View>
+                  <ThemedText style={styles.checkboxOptionText}>Ship to a different address?</ThemedText>
+                </Pressable>
+              </View>
+              <Pressable
+                style={[styles.payButton, !isFormValid() && styles.payButtonDisabled]}
+                onPress={handlePayNow}
+                disabled={!isFormValid()}
+              >
+                <ThemedText variant="text-base-bold" style={styles.payButtonText}>
+                  Pay now
+                </ThemedText>
               </Pressable>
             </View>
-            <Pressable
-              style={[styles.payButton, !isFormValid() && styles.payButtonDisabled]}
-              onPress={handlePayNow}
-              disabled={!isFormValid()}
-            >
-              <ThemedText variant="text-base-bold" style={styles.payButtonText}>
-                Pay now
-              </ThemedText>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <CountrySelectionModal />
-      <StateSelectionModal />
-      <SuccessModal />
-    </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+        <CountrySelectionModal />
+        <StateSelectionModal />
+        <SuccessModal />
+      </View>
+    </Suspense>
   )
 }
 

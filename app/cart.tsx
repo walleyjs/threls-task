@@ -5,8 +5,10 @@ import { ThemedText } from "@/components/ThemedText"
 import { CloseIcon } from "@/components/ui/CloseIcon"
 import { Footer } from "@/components/ui/Footer"
 import { Header } from "@/components/ui/Header"
+import { LoadingScreen } from '@/components/ui/LoadingScreen'
 import { Colors } from "@/constants/Colors"
 import { useRouter } from "expo-router"
+import { Suspense } from 'react'
 import { Image, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native"
 
 export default function CartScreen() {
@@ -70,85 +72,221 @@ export default function CartScreen() {
 
   if (isWide) {
     return (
-      <View style={styles.webContainer}>
-        <Header />
-        <ScrollView
-          style={styles.webScrollView}
-          contentContainerStyle={styles.webScrollContent}
-          showsVerticalScrollIndicator={true}
-        >
-          <View style={styles.webContent}>
-            <View style={styles.webInnerContent}>
-              <ThemedText variant="text-xl-semibold" style={styles.webTitle}>
-                My Cart
-              </ThemedText>
+      <Suspense fallback={<LoadingScreen />}>
+        <View style={styles.webContainer}>
+          <Header />
+          <ScrollView
+            style={styles.webScrollView}
+            contentContainerStyle={styles.webScrollContent}
+            showsVerticalScrollIndicator={true}
+          >
+            <View style={styles.webContent}>
+              <View style={styles.webInnerContent}>
+                <ThemedText variant="text-xl-semibold" style={styles.webTitle}>
+                  My Cart
+                </ThemedText>
 
-              <View style={styles.webLayout}>
-                <View style={styles.webCartSection}>
-                  {items.length === 0 ? (
-                    <View style={styles.webEmptyState}>
-                      <ThemedText variant="text-lg-regular" style={styles.webEmptyText}>
-                        Your cart is empty.
-                      </ThemedText>
-                    </View>
-                  ) : (
-                    <View style={styles.webCartTable}>
-                      <View style={styles.webTableHeader}>
-                        <ThemedText
-                          variant="text-xs-medium"
-                          style={[styles.webHeaderCell, styles.webProductColumn]}
-                        >
-                          Product
+                <View style={styles.webLayout}>
+                  <View style={styles.webCartSection}>
+                    {items.length === 0 ? (
+                      <View style={styles.webEmptyState}>
+                        <ThemedText variant="text-lg-regular" style={styles.webEmptyText}>
+                          Your cart is empty.
                         </ThemedText>
-                        <ThemedText
-                          variant="text-xs-medium"
-                          style={[styles.webHeaderCell, styles.webQuantityColumn]}
-                        >
-                          Quantity
-                        </ThemedText>
-                        <ThemedText
-                          variant="text-xs-medium"
-                          style={[styles.webHeaderCell, styles.webSubtotalColumn]}
-                        >
+                      </View>
+                    ) : (
+                      <View style={styles.webCartTable}>
+                        <View style={styles.webTableHeader}>
+                          <ThemedText
+                            variant="text-xs-medium"
+                            style={[styles.webHeaderCell, styles.webProductColumn]}
+                          >
+                            Product
+                          </ThemedText>
+                          <ThemedText
+                            variant="text-xs-medium"
+                            style={[styles.webHeaderCell, styles.webQuantityColumn]}
+                          >
+                            Quantity
+                          </ThemedText>
+                          <ThemedText
+                            variant="text-xs-medium"
+                            style={[styles.webHeaderCell, styles.webSubtotalColumn]}
+                          >
+                            Subtotal
+                          </ThemedText>
+                       
+                        </View>
+
+                        {items.map((item) => (
+                          <View key={`${item.product.id}-${item.variant.id}`} style={styles.webTableRow}>
+                            <View style={[styles.webTableCell, styles.webProductColumn]}>
+                              <View style={styles.webProductImageContainer}>
+                                <Image
+                                  source={{
+                                    uri:
+                                      item.product.media[0]?.conversions?.["medium-square"] || item.product.media[0]?.url,
+                                  }}
+                                  style={styles.webProductImage}
+                                  resizeMode="contain"
+                                />
+                              </View>
+                              <View style={styles.webProductInfo}>
+                                <ThemedText variant="text-xs-medium" numberOfLines={2} style={styles.webProductTitle}>
+                                  {item.product.title}
+                                </ThemedText>
+                                <ThemedText variant="text-xs-medium" style={styles.webPricePerItem}>
+                                  €{item.variant.price.amount.toFixed(2)}
+                                </ThemedText>
+                                <ThemedText variant="text-xs-medium" style={styles.webVariantText}>
+                                  {item.variant.variant_type_options.map((opt) => `${opt.value}`).join(" | ")}
+                                </ThemedText>
+                              
+                              </View>
+                            </View>
+
+                            <View style={[styles.webTableCell, styles.webQuantityColumn]}>
+                              <QuantitySelector item={item} />
+                            </View>
+
+                            <View style={[styles.webTableCell, styles.webSubtotalColumn]}>
+                              <ThemedText variant="text-sm-medium" style={styles.webSubtotalPrice}>
+                                €{(item.variant.price.amount * item.quantity).toFixed(2)}
+                              </ThemedText>
+                              <Pressable
+                                onPress={() =>
+                                  dispatch({
+                                    type: "REMOVE_ITEM",
+                                    productId: item.product.id,
+                                    variantId: item.variant.id,
+                                  })
+                                }
+                                style={styles.webRemoveButton}
+                                accessibilityRole="button"
+                                accessibilityLabel="Remove item"
+                              >
+                                <ThemedText>
+                                <CloseIcon/>
+                                </ThemedText>
+                              </Pressable>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.webSummarySection}>
+                    <ThemedText variant="text-lg-semibold" style={styles.webSummaryTitle}>
+                      Summary
+                    </ThemedText>
+
+                    <View style={styles.webSummaryContent}>
+                      <View style={styles.webSummaryRow}>
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
                           Subtotal
                         </ThemedText>
-                     
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
+                          €{subtotal.toFixed(2)}
+                        </ThemedText>
                       </View>
 
-                      {items.map((item) => (
-                        <View key={`${item.product.id}-${item.variant.id}`} style={styles.webTableRow}>
-                          <View style={[styles.webTableCell, styles.webProductColumn]}>
-                            <View style={styles.webProductImageContainer}>
-                              <Image
-                                source={{
-                                  uri:
-                                    item.product.media[0]?.conversions?.["medium-square"] || item.product.media[0]?.url,
-                                }}
-                                style={styles.webProductImage}
-                                resizeMode="contain"
-                              />
-                            </View>
-                            <View style={styles.webProductInfo}>
-                              <ThemedText variant="text-xs-medium" numberOfLines={2} style={styles.webProductTitle}>
-                                {item.product.title}
-                              </ThemedText>
-                              <ThemedText variant="text-xs-medium" style={styles.webPricePerItem}>
-                                €{item.variant.price.amount.toFixed(2)}
-                              </ThemedText>
-                              <ThemedText variant="text-xs-medium" style={styles.webVariantText}>
-                                {item.variant.variant_type_options.map((opt) => `${opt.value}`).join(" | ")}
-                              </ThemedText>
-                            
-                            </View>
-                          </View>
+                      <View style={styles.webSummaryRow}>
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
+                          Shipping estimate
+                        </ThemedText>
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
+                          €{shipping.toFixed(2)}
+                        </ThemedText>
+                      </View>
 
-                          <View style={[styles.webTableCell, styles.webQuantityColumn]}>
-                            <QuantitySelector item={item} />
-                          </View>
+                      <View style={styles.webSummaryRow}>
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
+                          Tax estimate
+                        </ThemedText>
+                        <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
+                          €{tax.toFixed(2)}
+                        </ThemedText>
+                      </View>
 
-                          <View style={[styles.webTableCell, styles.webSubtotalColumn]}>
-                            <ThemedText variant="text-sm-medium" style={styles.webSubtotalPrice}>
-                              €{(item.variant.price.amount * item.quantity).toFixed(2)}
+                      <View style={[styles.webSummaryRow, styles.webTotalRow]}>
+                        <ThemedText variant="text-sm-medium" style={styles.webTotalLabel}>
+                          Total
+                        </ThemedText>
+                        <ThemedText variant="text-sm-medium" style={styles.webTotalValue}>
+                          €{total.toFixed(2)}
+                        </ThemedText>
+                      </View>
+                    </View>
+
+                    <Pressable
+                      style={[styles.webCheckoutButton, items.length === 0 && styles.checkoutButtonDisabled]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Checkout"
+                      onPress={() => router.push("/checkout")}
+                      disabled={items.length === 0}
+                    >
+                      <ThemedText variant="text-base-bold" style={styles.webCheckoutText}>
+                        Checkout
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <Footer />
+          </ScrollView>
+         
+        </View>
+      </Suspense>
+    )
+  }
+
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <View style={styles.mobileContainer}>
+        <Header />
+        <ScrollView
+          style={styles.mobileScrollView}
+          contentContainerStyle={styles.mobileScrollContent}
+          showsVerticalScrollIndicator={true}
+          scrollEnabled={true}
+        >
+          <View style={styles.mobileContent}>
+            <ThemedText variant="text-xl-semibold" style={styles.mobileTitle}>
+              My Cart
+            </ThemedText>
+
+            {items.length === 0 ? (
+              <View style={styles.mobileEmptyState}>
+                <ThemedText variant="text-lg-regular" style={styles.mobileEmptyText}>
+                  Your cart is empty.
+                </ThemedText>
+              </View>
+            ) : (
+              <View style={styles.mobileCartCard}>
+                <ThemedText variant="text-xs-medium" style={styles.mobileProductHeader}>
+                  Product
+                </ThemedText>
+
+                <View style={styles.mobileItemsList}>
+                  {items.map((item) => (
+                    <View key={`${item.product.id}-${item.variant.id}`} style={styles.mobileCartItem}>
+                      <View style={styles.mobileProductRow}>
+                        <View style={styles.mobileProductImageContainer}>
+                          <Image
+                            source={{
+                              uri: item.product.media[0]?.conversions?.["medium-square"] || item.product.media[0]?.url,
+                            }}
+                            style={styles.mobileProductImage}
+                            resizeMode="contain"
+                          />
+                        </View>
+
+                        <View style={styles.mobileProductInfo}>
+                          <View style={styles.mobileProductTop}>
+                            <ThemedText variant="text-xs-medium" numberOfLines={2} style={styles.mobileProductTitle}>
+                              {item.product.title}
                             </ThemedText>
                             <Pressable
                               onPress={() =>
@@ -158,230 +296,98 @@ export default function CartScreen() {
                                   variantId: item.variant.id,
                                 })
                               }
-                              style={styles.webRemoveButton}
+                              style={styles.mobileRemoveButton}
                               accessibilityRole="button"
                               accessibilityLabel="Remove item"
                             >
-                              <ThemedText>
-                              <CloseIcon/>
-                              </ThemedText>
+                             
+                               <CloseIcon/>
+                            
                             </Pressable>
                           </View>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
 
-                <View style={styles.webSummarySection}>
-                  <ThemedText variant="text-lg-semibold" style={styles.webSummaryTitle}>
-                    Summary
-                  </ThemedText>
-
-                  <View style={styles.webSummaryContent}>
-                    <View style={styles.webSummaryRow}>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
-                        Subtotal
-                      </ThemedText>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
-                        €{subtotal.toFixed(2)}
-                      </ThemedText>
-                    </View>
-
-                    <View style={styles.webSummaryRow}>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
-                        Shipping estimate
-                      </ThemedText>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
-                        €{shipping.toFixed(2)}
-                      </ThemedText>
-                    </View>
-
-                    <View style={styles.webSummaryRow}>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryLabel}>
-                        Tax estimate
-                      </ThemedText>
-                      <ThemedText variant="text-sm-medium" style={styles.webSummaryValue}>
-                        €{tax.toFixed(2)}
-                      </ThemedText>
-                    </View>
-
-                    <View style={[styles.webSummaryRow, styles.webTotalRow]}>
-                      <ThemedText variant="text-sm-medium" style={styles.webTotalLabel}>
-                        Total
-                      </ThemedText>
-                      <ThemedText variant="text-sm-medium" style={styles.webTotalValue}>
-                        €{total.toFixed(2)}
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  <Pressable
-                    style={[styles.webCheckoutButton, items.length === 0 && styles.checkoutButtonDisabled]}
-                    accessibilityRole="button"
-                    accessibilityLabel="Checkout"
-                    onPress={() => router.push("/checkout")}
-                    disabled={items.length === 0}
-                  >
-                    <ThemedText variant="text-base-bold" style={styles.webCheckoutText}>
-                      Checkout
-                    </ThemedText>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          </View>
-          <Footer />
-        </ScrollView>
-       
-      </View>
-    )
-  }
-
-  return (
-    <View style={styles.mobileContainer}>
-      <Header />
-      <ScrollView
-        style={styles.mobileScrollView}
-        contentContainerStyle={styles.mobileScrollContent}
-        showsVerticalScrollIndicator={true}
-        scrollEnabled={true}
-      >
-        <View style={styles.mobileContent}>
-          <ThemedText variant="text-xl-semibold" style={styles.mobileTitle}>
-            My Cart
-          </ThemedText>
-
-          {items.length === 0 ? (
-            <View style={styles.mobileEmptyState}>
-              <ThemedText variant="text-lg-regular" style={styles.mobileEmptyText}>
-                Your cart is empty.
-              </ThemedText>
-            </View>
-          ) : (
-            <View style={styles.mobileCartCard}>
-              <ThemedText variant="text-xs-medium" style={styles.mobileProductHeader}>
-                Product
-              </ThemedText>
-
-              <View style={styles.mobileItemsList}>
-                {items.map((item) => (
-                  <View key={`${item.product.id}-${item.variant.id}`} style={styles.mobileCartItem}>
-                    <View style={styles.mobileProductRow}>
-                      <View style={styles.mobileProductImageContainer}>
-                        <Image
-                          source={{
-                            uri: item.product.media[0]?.conversions?.["medium-square"] || item.product.media[0]?.url,
-                          }}
-                          style={styles.mobileProductImage}
-                          resizeMode="contain"
-                        />
-                      </View>
-
-                      <View style={styles.mobileProductInfo}>
-                        <View style={styles.mobileProductTop}>
-                          <ThemedText variant="text-xs-medium" numberOfLines={2} style={styles.mobileProductTitle}>
-                            {item.product.title}
+                          <ThemedText variant="text-xs-semibold" style={styles.mobilePricePerItem}>
+                            €{item.variant.price.amount.toFixed(2)}
                           </ThemedText>
-                          <Pressable
-                            onPress={() =>
-                              dispatch({
-                                type: "REMOVE_ITEM",
-                                productId: item.product.id,
-                                variantId: item.variant.id,
-                              })
-                            }
-                            style={styles.mobileRemoveButton}
-                            accessibilityRole="button"
-                            accessibilityLabel="Remove item"
-                          >
-                           
-                             <CloseIcon/>
-                          
-                          </Pressable>
+
+                          <ThemedText variant="text-xs-regular" style={styles.mobileVariantText}>
+                            {item.variant.variant_type_options.map((opt) => `${opt.value}`).join(" | ")}
+                          </ThemedText>
                         </View>
+                      </View>
 
-                        <ThemedText variant="text-xs-semibold" style={styles.mobilePricePerItem}>
-                          €{item.variant.price.amount.toFixed(2)}
-                        </ThemedText>
-
-                        <ThemedText variant="text-xs-regular" style={styles.mobileVariantText}>
-                          {item.variant.variant_type_options.map((opt) => `${opt.value}`).join(" | ")}
+                      <View style={styles.mobileControlsRow}>
+                        <QuantitySelector item={item} />
+                        <ThemedText variant="text-base-medium" style={styles.mobileSubtotalPrice}>
+                          €{(item.variant.price.amount * item.quantity).toFixed(2)}
                         </ThemedText>
                       </View>
                     </View>
-
-                    <View style={styles.mobileControlsRow}>
-                      <QuantitySelector item={item} />
-                      <ThemedText variant="text-base-medium" style={styles.mobileSubtotalPrice}>
-                        €{(item.variant.price.amount * item.quantity).toFixed(2)}
-                      </ThemedText>
-                    </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-          <View style={styles.mobileSummaryCard}>
-            <ThemedText variant="text-base-semibold" style={styles.mobileSummaryTitle}>
-              Summary
-            </ThemedText>
-
-            <View style={styles.mobileSummaryContent}>
-              <View style={styles.mobileSummaryRow}>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
-                  Subtotal
-                </ThemedText>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
-                  €{subtotal.toFixed(2)}
-                </ThemedText>
-              </View>
-
-              <View style={styles.mobileSummaryRow}>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
-                  Shipping estimate
-                </ThemedText>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
-                  €{shipping.toFixed(2)}
-                </ThemedText>
-              </View>
-
-              <View style={styles.mobileSummaryRow}>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
-                  Tax estimate
-                </ThemedText>
-                <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
-                  €{tax.toFixed(2)}
-                </ThemedText>
-              </View>
-
-              <View style={[styles.mobileSummaryRow, styles.mobileTotalRow]}>
-                <ThemedText variant="text-sm-medium" style={styles.mobileTotalLabel}>
-                  Total
-                </ThemedText>
-                <ThemedText variant="text-sm-medium" style={styles.mobileTotalValue}>
-                  €{total.toFixed(2)}
-                </ThemedText>
-              </View>
-            </View>
-
-            <Pressable
-              style={[styles.mobileCheckoutButton, items.length === 0 && styles.checkoutButtonDisabled]}
-              accessibilityRole="button"
-              accessibilityLabel="Checkout"
-              onPress={() => router.push("/checkout")}
-              disabled={items.length === 0}
-            >
-              <ThemedText variant="text-sm-semibold" style={styles.mobileCheckoutText}>
-                Checkout
+            <View style={styles.mobileSummaryCard}>
+              <ThemedText variant="text-base-semibold" style={styles.mobileSummaryTitle}>
+                Summary
               </ThemedText>
-            </Pressable>
+
+              <View style={styles.mobileSummaryContent}>
+                <View style={styles.mobileSummaryRow}>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
+                    Subtotal
+                  </ThemedText>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
+                    €{subtotal.toFixed(2)}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.mobileSummaryRow}>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
+                    Shipping estimate
+                  </ThemedText>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
+                    €{shipping.toFixed(2)}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.mobileSummaryRow}>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryLabel}>
+                    Tax estimate
+                  </ThemedText>
+                  <ThemedText variant="text-xs-medium" style={styles.mobileSummaryValue}>
+                    €{tax.toFixed(2)}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.mobileSummaryRow, styles.mobileTotalRow]}>
+                  <ThemedText variant="text-sm-medium" style={styles.mobileTotalLabel}>
+                    Total
+                  </ThemedText>
+                  <ThemedText variant="text-sm-medium" style={styles.mobileTotalValue}>
+                    €{total.toFixed(2)}
+                  </ThemedText>
+                </View>
+              </View>
+
+              <Pressable
+                style={[styles.mobileCheckoutButton, items.length === 0 && styles.checkoutButtonDisabled]}
+                accessibilityRole="button"
+                accessibilityLabel="Checkout"
+                onPress={() => router.push("/checkout")}
+                disabled={items.length === 0}
+              >
+                <ThemedText variant="text-sm-semibold" style={styles.mobileCheckoutText}>
+                  Checkout
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      {/* <Footer /> */}
-    </View>
+        </ScrollView>
+        {/* <Footer /> */}
+      </View>
+    </Suspense>
   )
 }
 
