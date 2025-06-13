@@ -5,6 +5,8 @@ import type React from "react"
 import { Colors } from "@/constants/Colors"
 import { Platform, Pressable, StyleSheet, useWindowDimensions, View } from "react-native"
 import { ThemedText } from "../ThemedText"
+import { FaceBookIcon } from "./FaceBook"
+import { InstgaramIcon } from "./Instagram"
 
 interface FooterProps {
   onPrivacyPress?: () => void
@@ -65,6 +67,7 @@ export const Footer: React.FC<FooterProps> = ({
               </ThemedText>
             </Pressable>
           </View>
+
           <View style={styles.webSocialSection}>
             <Pressable
               onPress={handleFacebookPress}
@@ -72,7 +75,7 @@ export const Footer: React.FC<FooterProps> = ({
               accessibilityRole="button"
               accessibilityLabel="Visit our Facebook page"
             >
-              <ThemedText style={styles.webSocialIcon}>📘</ThemedText>
+              <FaceBookIcon />
             </Pressable>
             <Pressable
               onPress={handleInstagramPress}
@@ -80,7 +83,7 @@ export const Footer: React.FC<FooterProps> = ({
               accessibilityRole="button"
               accessibilityLabel="Visit our Instagram page"
             >
-              <ThemedText style={styles.webSocialIcon}>📷</ThemedText>
+              <InstgaramIcon />
             </Pressable>
           </View>
         </View>
@@ -121,25 +124,6 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <View style={styles.mobileContainer}>
-      <View style={styles.mobileSocialSection}>
-        <Pressable
-          onPress={handleFacebookPress}
-          style={styles.mobileSocialButton}
-          accessibilityRole="button"
-          accessibilityLabel="Visit our Facebook page"
-        >
-          <ThemedText style={styles.mobileSocialIcon}>📘</ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={handleInstagramPress}
-          style={styles.mobileSocialButton}
-          accessibilityRole="button"
-          accessibilityLabel="Visit our Instagram page"
-        >
-          <ThemedText style={styles.mobileSocialIcon}>📷</ThemedText>
-        </Pressable>
-      </View>
-
       <View style={styles.mobileContactsSection}>
         <ThemedText variant="text-lg-bold" style={styles.mobileContactsTitle}>
           Contacts
@@ -150,7 +134,24 @@ export const Footer: React.FC<FooterProps> = ({
           </ThemedText>
         </Pressable>
       </View>
-
+      <View style={styles.mobileSocialSection}>
+        <Pressable
+          onPress={handleFacebookPress}
+          style={styles.mobileSocialButton}
+          accessibilityRole="button"
+          accessibilityLabel="Visit our Facebook page"
+        >
+          <FaceBookIcon />
+        </Pressable>
+        <Pressable
+          onPress={handleInstagramPress}
+          style={styles.mobileSocialButton}
+          accessibilityRole="button"
+          accessibilityLabel="Visit our Instagram page"
+        >
+          <InstgaramIcon />
+        </Pressable>
+      </View>
       <View style={styles.mobileLegalSection}>
         <Pressable onPress={onPrivacyPress} style={styles.mobileLegalButton}>
           <ThemedText variant="text-base-regular" style={styles.mobileLegalText}>
@@ -168,7 +169,6 @@ export const Footer: React.FC<FooterProps> = ({
           </ThemedText>
         </Pressable>
       </View>
-
       <View style={styles.mobilePoweredSection}>
         <View style={styles.mobilePoweredBadge}>
           <ThemedText variant="text-sm-regular" style={styles.mobilePoweredText}>
@@ -184,24 +184,26 @@ export const Footer: React.FC<FooterProps> = ({
 }
 
 const styles = StyleSheet.create({
+
   webContainer: {
-    backgroundColor: Colors.light.primary400,
-    paddingHorizontal: 40,
-    paddingVertical: 32,
-    gap: 32,
+    backgroundColor: Colors.light.primary400, 
+    paddingHorizontal: 64,
+    paddingVertical: 40,
+    paddingTop:100
   },
   webTopSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    marginBottom: 80,
   },
   webContactsSection: {
-    gap: 12,
+    gap: 8,
   },
   webContactsTitle: {
     color: Colors.light.background,
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   webEmailButton: {
     alignSelf: "flex-start",
@@ -209,18 +211,16 @@ const styles = StyleSheet.create({
   webEmailText: {
     color: Colors.light.background,
     fontSize: 16,
-    textDecorationLine: "underline",
+    textDecorationLine: "none",
   },
   webSocialSection: {
-    flexDirection: "row",
+    flexDirection: "column",
     gap: 16,
     alignItems: "center",
   },
   webSocialButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    width: 24,
+    height: 24,
     alignItems: "center",
     justifyContent: "center",
     ...Platform.select({
@@ -229,16 +229,14 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  webSocialIcon: {
-    fontSize: 20,
-  },
   webBottomSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingTop: 20, 
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.2)",
-    paddingTop: 24,
+    borderTopColor: "#334AAD",
+   
   },
   webLegalSection: {
     flexDirection: "row",
@@ -250,7 +248,7 @@ const styles = StyleSheet.create({
   webLegalText: {
     color: Colors.light.background,
     fontSize: 14,
-    textDecorationLine: "underline",
+    textDecorationLine: "none", 
   },
   webPoweredSection: {
     alignItems: "flex-end",
@@ -260,48 +258,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.2)",
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 6,
   },
   webPoweredText: {
     color: Colors.light.background,
-    fontSize: 12,
+    fontSize: 14,
   },
   webTwineText: {
     color: Colors.light.background,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "700",
   },
 
   mobileContainer: {
-    backgroundColor: Colors.light.primary400,
+    backgroundColor: "#2A3990", 
     paddingHorizontal: 20,
     paddingVertical: 32,
-    gap: 32,
-  },
-  mobileSocialSection: {
-    flexDirection: "row",
-    gap: 16,
-    alignItems: "center",
-  },
-  mobileSocialButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mobileSocialIcon: {
-    fontSize: 24,
   },
   mobileContactsSection: {
-    gap: 12,
+    marginBottom: 24,
+    gap: 8,
   },
   mobileContactsTitle: {
     color: Colors.light.background,
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   mobileEmailButton: {
     alignSelf: "flex-start",
@@ -309,30 +291,45 @@ const styles = StyleSheet.create({
   mobileEmailText: {
     color: Colors.light.background,
     fontSize: 16,
-    textDecorationLine: "underline",
+    textDecorationLine: "none", 
+  },
+  mobileSocialSection: {
+    flexDirection: "row",
+    gap: 16,
+    alignItems: "center",
+    marginBottom: 32,
+    alignSelf: "flex-end",
+  },
+  mobileSocialButton: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
   mobileLegalSection: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 16,
+    marginBottom: 24,
   },
   mobileLegalButton: {
     alignSelf: "flex-start",
   },
   mobileLegalText: {
     color: Colors.light.background,
-    fontSize: 16,
-    textDecorationLine: "underline",
+    fontSize: 14,
+    textDecorationLine: "none",
   },
   mobilePoweredSection: {
-    alignItems: "center",
-    marginTop: 16,
+    alignItems: "flex-end",
   },
   mobilePoweredBadge: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   mobilePoweredText: {
     color: Colors.light.background,

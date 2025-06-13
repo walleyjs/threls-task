@@ -1,6 +1,6 @@
-
 import { useCart } from "@/components/CartContext"
 import { ThemedText } from "@/components/ThemedText"
+import { Footer } from "@/components/ui/Footer"
 import { Header } from "@/components/ui/Header"
 import { ShipIcon } from "@/components/ui/ShipIcon"
 import { StoreIcon } from "@/components/ui/StoreIcon"
@@ -37,11 +37,12 @@ interface FormState {
 }
 
 export default function CheckoutScreen() {
-  const { state } = useCart()
+  const { state, dispatch } = useCart()
   const items = state.items
   const { width } = useWindowDimensions()
   const isWide = width >= 900
   const router = useRouter()
+  
 
   const subtotal = items.reduce((sum, item) => sum + item.variant.price.amount * item.quantity, 0)
   const shipping = items.length ? 2.5 : 0
@@ -64,9 +65,10 @@ export default function CheckoutScreen() {
     shipToDifferent: false,
   })
 
-  // Using modal approach instead of dropdown for better control
   const [showCountryModal, setShowCountryModal] = useState(false)
   const [showStateModal, setShowStateModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [orderNumber, setOrderNumber] = useState("")
 
   const selectedCountry = europeanCountries.find((c) => c.code === form.country)
   const availableStates = selectedCountry?.states || []
@@ -99,14 +101,29 @@ export default function CheckoutScreen() {
 
   const isFormValid = () => {
     const requiredFields = ["firstName", "lastName", "phone", "address1", "city", "zip"]
-    return requiredFields.every((field) => {
+    const hasRequiredFields = requiredFields.every((field) => {
       const value = form[field as keyof typeof form]
       return typeof value === "string" && value.trim() !== ""
     })
+    return hasRequiredFields && items.length > 0
   }
 
   const handlePayNow = () => {
-    router.push("./success")
+    if (!isFormValid()) return
+
+    const newOrderNumber = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    setOrderNumber(newOrderNumber)
+    setShowSuccessModal(true)
+  }
+
+  const handleContinueShopping = () => {
+    handleCloseSuccessModal()
+  }
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false)
+    dispatch({ type: "CLEAR_CART" })
+    router.push("/")
   }
 
   const SummarySection = () => (
@@ -148,6 +165,83 @@ export default function CheckoutScreen() {
     </View>
   )
 
+  const SuccessModal = () => (
+    <Modal visible={showSuccessModal} transparent={true} animationType="fade" onRequestClose={handleCloseSuccessModal}>
+      <View style={styles.successModalOverlay}>
+        <View style={[styles.successModalContent, isWide && styles.successModalContentWide]}>
+          <View style={styles.successIconContainer}>
+            <View style={styles.successIcon}>
+              <ThemedText style={styles.successCheckmark}>✓</ThemedText>
+            </View>
+          </View>
+          <ThemedText variant="text-xl-bold" style={styles.successTitle}>
+            Order Successful!
+          </ThemedText>
+
+          <ThemedText variant="text-base-regular" style={styles.successSubtitle}>
+            Thank you for your purchase
+          </ThemedText>
+
+          <ThemedText variant="text-sm-regular" style={styles.successDescription}>
+            Your order has been successfully placed and is being processed. You will receive a confirmation email
+            shortly with your order details.
+          </ThemedText>
+
+          <View style={styles.successOrderDetails}>
+            <View style={styles.successOrderRow}>
+              <ThemedText variant="text-sm-medium" style={styles.successOrderLabel}>
+                Order Number:
+              </ThemedText>
+              <ThemedText variant="text-sm-semibold" style={styles.successOrderValue}>
+                #{orderNumber}
+              </ThemedText>
+            </View>
+            <View style={styles.successOrderRow}>
+              <ThemedText variant="text-sm-medium" style={styles.successOrderLabel}>
+                Estimated Delivery:
+              </ThemedText>
+              <ThemedText variant="text-sm-semibold" style={styles.successOrderValue}>
+                3-5 business days
+              </ThemedText>
+            </View>
+            <View style={styles.successOrderRow}>
+              <ThemedText variant="text-sm-medium" style={styles.successOrderLabel}>
+                Total Amount:
+              </ThemedText>
+              <ThemedText variant="text-sm-semibold" style={styles.successOrderValue}>
+                €{total.toFixed(2)}
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.successButtonContainer}>
+            <Pressable
+              style={({ pressed }) => [styles.successPrimaryButton, pressed && { opacity: 0.9 }]}
+              onPress={handleContinueShopping}
+              accessibilityRole="button"
+              accessibilityLabel="Continue shopping"
+            >
+              <ThemedText variant="text-base-bold" style={styles.successPrimaryButtonText}>
+                Continue Shopping
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.successCloseButton, pressed && { opacity: 0.9 }]}
+              onPress={handleCloseSuccessModal}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
+              <ThemedText variant="text-base-semibold" style={styles.successCloseButtonText}>
+                Close
+              </ThemedText>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  )
+
 
   const CountrySelectionModal = () => (
     <Modal
@@ -173,7 +267,7 @@ export default function CheckoutScreen() {
                 style={[styles.modalItem, form.country === country.code && styles.modalItemSelected]}
                 onPress={() => handleCountrySelect(country)}
               >
-                <ThemedText
+                <ThemedText variant="text-sm-medium"
                   style={[styles.modalItemText, form.country === country.code && styles.modalItemTextSelected]}
                 >
                   {country.name}
@@ -187,7 +281,6 @@ export default function CheckoutScreen() {
     </Modal>
   )
 
-  // State selection modal
   const StateSelectionModal = () => (
     <Modal
       visible={showStateModal}
@@ -213,7 +306,7 @@ export default function CheckoutScreen() {
                   style={[styles.modalItem, form.state === state.code && styles.modalItemSelected]}
                   onPress={() => handleStateSelect(state)}
                 >
-                  <ThemedText style={[styles.modalItemText, form.state === state.code && styles.modalItemTextSelected]}>
+                  <ThemedText variant="text-sm-medium" style={[styles.modalItemText, form.state === state.code && styles.modalItemTextSelected]}>
                     {state.name}
                   </ThemedText>
                   {form.state === state.code && <ThemedText style={styles.modalItemCheck}>✓</ThemedText>}
@@ -243,11 +336,11 @@ export default function CheckoutScreen() {
                 </ThemedText>
                 <View style={styles.formRow}>
                   <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                       First name
                     </ThemedText>
                     <TextInput
-                      style={styles.textInput}
+                      style={styles.textInputWide}
                       value={form.firstName}
                       onChangeText={(v) => handleChange("firstName", v)}
                       placeholder="Enter your first name"
@@ -255,11 +348,11 @@ export default function CheckoutScreen() {
                     />
                   </View>
                   <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                       Last name
                     </ThemedText>
                     <TextInput
-                      style={styles.textInput}
+                      style={styles.textInputWide}
                       value={form.lastName}
                       onChangeText={(v) => handleChange("lastName", v)}
                       placeholder="Enter your last name"
@@ -268,11 +361,11 @@ export default function CheckoutScreen() {
                   </View>
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     Company
                   </ThemedText>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.textInputWide}
                     value={form.company}
                     onChangeText={(v) => handleChange("company", v)}
                     placeholder="Enter your company name"
@@ -280,11 +373,11 @@ export default function CheckoutScreen() {
                   />
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     VAT number
                   </ThemedText>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.textInputWide}
                     value={form.vat}
                     onChangeText={(v) => handleChange("vat", v)}
                     placeholder="Enter your VAT number"
@@ -292,11 +385,11 @@ export default function CheckoutScreen() {
                   />
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     Phone number
                   </ThemedText>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.textInputWide}
                     value={form.phone}
                     onChangeText={(v) => handleChange("phone", v)}
                     placeholder="012334455"
@@ -305,23 +398,23 @@ export default function CheckoutScreen() {
                   />
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     Country
                   </ThemedText>
                   <Pressable style={styles.selectInput} onPress={() => setShowCountryModal(true)}>
-                    <ThemedText style={styles.selectText}>{getCountryName(form.country)}</ThemedText>
+                    <ThemedText style={styles.selectTextWide}>{getCountryName(form.country)}</ThemedText>
                     <ThemedText style={styles.selectArrow}>▼</ThemedText>
                   </Pressable>
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     State
                   </ThemedText>
                   <Pressable
                     style={[styles.selectInput, !availableStates.length && styles.selectInputDisabled]}
                     onPress={() => availableStates.length > 0 && setShowStateModal(true)}
                   >
-                    <ThemedText style={[styles.selectText, !availableStates.length && styles.selectTextDisabled]}>
+                    <ThemedText style={[styles.selectTextWide, !availableStates.length && styles.selectTextDisabled]}>
                       {form.state
                         ? getStateName(form.state)
                         : availableStates.length > 0
@@ -332,11 +425,11 @@ export default function CheckoutScreen() {
                   </Pressable>
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     Address line 1
                   </ThemedText>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.textInputWide}
                     value={form.address1}
                     onChangeText={(v) => handleChange("address1", v)}
                     placeholder="House number and street name"
@@ -344,11 +437,11 @@ export default function CheckoutScreen() {
                   />
                 </View>
                 <View style={styles.formField}>
-                  <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                  <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                     Address line 2
                   </ThemedText>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.textInputWide}
                     value={form.address2}
                     onChangeText={(v) => handleChange("address2", v)}
                     placeholder="House number and street name"
@@ -357,11 +450,11 @@ export default function CheckoutScreen() {
                 </View>
                 <View style={styles.formRow}>
                   <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                       City
                     </ThemedText>
                     <TextInput
-                      style={styles.textInput}
+                      style={styles.textInputWide}
                       value={form.city}
                       onChangeText={(v) => handleChange("city", v)}
                       placeholder="City"
@@ -369,11 +462,11 @@ export default function CheckoutScreen() {
                     />
                   </View>
                   <View style={styles.formFieldHalf}>
-                    <ThemedText variant="text-xs-medium" style={styles.fieldLabel}>
+                    <ThemedText variant="text-xs-medium" style={styles.fieldLabelWide}>
                       Zip Code
                     </ThemedText>
                     <TextInput
-                      style={styles.textInput}
+                      style={styles.textInputWide}
                       value={form.zip}
                       onChangeText={(v) => handleChange("zip", v)}
                       placeholder="Zip code"
@@ -446,9 +539,11 @@ export default function CheckoutScreen() {
               <SummarySection />
             </View>
           </View>
+          <Footer/>
         </ScrollView>
         <CountrySelectionModal />
         <StateSelectionModal />
+        <SuccessModal />
       </View>
     )
   }
@@ -460,7 +555,7 @@ export default function CheckoutScreen() {
         <ScrollView contentContainerStyle={styles.mobileScrollContent} showsVerticalScrollIndicator={false}>
           <SummarySection />
           <View style={styles.mobileFormCard}>
-            <ThemedText variant="text-lg-semibold" style={styles.formTitle}>
+            <ThemedText variant="text-base-semibold" style={styles.formTitle}>
               Billing Details
             </ThemedText>
             <View style={styles.formField}>
@@ -580,7 +675,7 @@ export default function CheckoutScreen() {
                 value={form.address2}
                 onChangeText={(v) => handleChange("address2", v)}
                 placeholder="House number and street name"
-                placeholderTextColor={Colors.light.gray400}
+                placeholderTextColor={Colors.light.gray500}
               />
             </View>
 
@@ -673,6 +768,7 @@ export default function CheckoutScreen() {
       </KeyboardAvoidingView>
       <CountrySelectionModal />
       <StateSelectionModal />
+      <SuccessModal />
     </View>
   )
 }
@@ -686,7 +782,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Web Styles
   webScrollContent: {
     flexGrow: 1,
     paddingVertical: 20,
@@ -711,7 +806,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  // Mobile Styles
   mobileScrollContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -719,22 +813,17 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   mobileFormCard: {
-    // backgroundColor: Colors.light.background,
+
     borderRadius: 12,
     padding: 24,
-    // shadowColor: Colors.light.text,
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
-    // elevation: 3,
+  
   },
 
-  // Summary Styles
+
   summaryCard: {
     backgroundColor: Colors.light.gray50,
     borderRadius: 12,
     padding: 24,
-    // elevation: 3,
   },
   summaryCardWide: {
     flex: 1,
@@ -775,7 +864,7 @@ const styles = StyleSheet.create({
     color: Colors.light.gray700,
   },
 
-  // Form Styles
+
   formTitle: {
     color: Colors.light.gray700,
     marginBottom: 24,
@@ -799,10 +888,26 @@ const styles = StyleSheet.create({
   fieldLabel: {
     color: Colors.light.gray700,
     marginBottom: 8,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  fieldLabelWide: {
+    color: Colors.light.gray700,
+    marginBottom: 8,
     fontSize: 14,
     fontWeight: "500",
   },
   textInput: {
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    backgroundColor: Colors.light.background,
+    color: Colors.light.text,
+  },
+  textInputWide: {
     borderWidth: 1,
     borderColor: Colors.light.gray300,
     borderRadius: 8,
@@ -828,6 +933,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.gray200,
   },
   selectText: {
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  selectTextWide: {
     fontSize: 16,
     color: Colors.light.text,
   },
@@ -871,7 +980,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   deliveryOptionSelected: {
-    // Styling for selected delivery option
+
   },
   deliveryOptionText: {
     flex: 1,
@@ -934,7 +1043,6 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
 
-  // Pay Button
   payButton: {
     backgroundColor: Colors.light.primary400,
     borderRadius: 8,
@@ -958,7 +1066,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Modal Styles (replacing dropdown)
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -1011,7 +1118,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.gray50,
   },
   modalItemText: {
-    fontSize: 16,
     color: Colors.light.text,
   },
   modalItemTextSelected: {
@@ -1030,5 +1136,125 @@ const styles = StyleSheet.create({
   modalEmptyText: {
     color: Colors.light.gray500,
     fontSize: 16,
+  },
+  successModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  successModalContent: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 16,
+    padding: 32,
+    width: "100%",
+    maxWidth: 500,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  successModalContentWide: {
+    maxWidth: 600,
+    padding: 40,
+  },
+  successIconContainer: {
+    marginBottom: 24,
+  },
+  successIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.light.success500,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: Colors.light.success500,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  successCheckmark: {
+    fontSize: 32,
+    color: Colors.light.background,
+    fontWeight: "bold",
+  },
+  successTitle: {
+    color: Colors.light.text,
+    textAlign: "center",
+    marginBottom: 8,
+    fontSize: 24,
+  },
+  successSubtitle: {
+    color: Colors.light.gray600,
+    textAlign: "center",
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  successDescription: {
+    color: Colors.light.gray600,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+    fontSize: 14,
+  },
+  successOrderDetails: {
+    backgroundColor: Colors.light.gray50,
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    marginBottom: 24,
+    gap: 12,
+  },
+  successOrderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  successOrderLabel: {
+    color: Colors.light.gray600,
+    fontSize: 14,
+  },
+  successOrderValue: {
+    color: Colors.light.text,
+    fontSize: 14,
+  },
+  successButtonContainer: {
+    width: "100%",
+    gap: 12,
+  },
+  successPrimaryButton: {
+    backgroundColor: Colors.light.primary400,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    shadowColor: Colors.light.primary400,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  successPrimaryButtonText: {
+    color: Colors.light.background,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  successCloseButton: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: Colors.light.gray300,
+  },
+  successCloseButtonText: {
+    color: Colors.light.gray600,
+    fontSize: 16,
+    fontWeight: "600",
   },
 })

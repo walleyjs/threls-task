@@ -3,13 +3,24 @@
 import { useCart } from "@/components/CartContext"
 import { ThemedText } from "@/components/ThemedText"
 import { ThemedView } from "@/components/ThemedView"
+import { Footer } from "@/components/ui/Footer"
 import { Header } from "@/components/ui/Header"
+import { HeartIcon } from "@/components/ui/Heart"
 import { Colors } from "@/constants/Colors"
 import { getProductBySlug, type Product, type ProductVariant } from "@/services/products"
 import { Image as ExpoImage } from "expo-image"
 import { useLocalSearchParams } from "expo-router"
 import { useEffect, useState } from "react"
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native"
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from "react-native"
 
 export default function ProductDetailsScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
@@ -200,26 +211,107 @@ export default function ProductDetailsScreen() {
                     "Discover the joy of farm-fresh asparagus – tender, flavorful, and oh-so-versatile! Whether lightly roasted, grilled to perfection, or simply sautéed, let this vibrant veggie elevate your meals with its delicious taste and nutritional goodness."}
                 </ThemedText>
 
+                {/* Color selection if available */}
+                {allColors.length > 0 && (
+                  <View style={styles.webColorSection}>
+                    <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
+                      Color
+                    </ThemedText>
+                    <View style={styles.webColorOptions}>
+                      {allColors.map((color) => (
+                        <Pressable
+                          key={color}
+                          style={[styles.webColorOption, selectedColor === color && styles.webColorOptionSelected]}
+                          onPress={() => setSelectedColor(color)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Select color ${color}`}
+                        >
+                          <View style={[styles.webColorCircle, { backgroundColor: color.toLowerCase() }]} />
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {allSizes.length > 0 && (
+                  <View style={styles.webSizeSection}>
+                    <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
+                      Size
+                    </ThemedText>
+                    <View style={styles.webSizeOptions}>
+                      {allSizes.map((size) => (
+                        <Pressable
+                          key={size}
+                          style={[styles.webSizeOption, selectedSize === size && styles.webSizeOptionSelected]}
+                          onPress={() => setSelectedSize(size)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Select size ${size}`}
+                        >
+                          <ThemedText style={[styles.webSizeText, selectedSize === size && styles.webSizeTextSelected]}>
+                            {size}
+                          </ThemedText>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
                 <View style={styles.webQuantitySection}>
-                  <ThemedText variant="text-base-semibold" style={styles.webQuantityLabel}>
+                  <ThemedText variant="text-base-semibold" style={styles.webSectionLabel}>
                     Quantity
                   </ThemedText>
-                  <View style={styles.webQuantityControls}>
+                  <View style={styles.webQuantityContainer}>
                     <Pressable
                       onPress={() => setQuantity((q) => Math.max(1, q - 1))}
                       style={styles.webQuantityButton}
                       accessibilityRole="button"
                       accessibilityLabel="Decrease quantity"
                     >
-                      <ThemedText style={styles.webQuantityButtonText}>▲</ThemedText>
+                      <ThemedText style={styles.webQuantityButtonText}>−</ThemedText>
                     </Pressable>
+
+                    <View style={styles.webQuantityInputContainer}>
+                      <TextInput
+                        value={quantity.toString()}
+                        onChangeText={(text) => {
+                          const num = Number.parseInt(text, 10)
+                          if (!isNaN(num) && num > 0) {
+                            setQuantity(num)
+                          } else if (text === "") {
+                            setQuantity(1)
+                          }
+                        }}
+                        keyboardType="numeric"
+                        style={styles.webQuantityInput}
+                        accessibilityLabel="Quantity"
+                      />
+                      <View style={styles.webQuantityArrows}>
+                        <Pressable
+                          onPress={() => setQuantity((q) => q + 1)}
+                          style={styles.webQuantityArrowButton}
+                          accessibilityRole="button"
+                          accessibilityLabel="Increase quantity"
+                        >
+                          <ThemedText style={styles.webQuantityArrowText}>▲</ThemedText>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                          style={styles.webQuantityArrowButton}
+                          accessibilityRole="button"
+                          accessibilityLabel="Decrease quantity"
+                        >
+                          <ThemedText style={styles.webQuantityArrowText}>▼</ThemedText>
+                        </Pressable>
+                      </View>
+                    </View>
+
                     <Pressable
                       onPress={() => setQuantity((q) => q + 1)}
                       style={styles.webQuantityButton}
                       accessibilityRole="button"
                       accessibilityLabel="Increase quantity"
                     >
-                      <ThemedText style={styles.webQuantityButtonText}>▼</ThemedText>
+                      <ThemedText style={styles.webQuantityButtonText}>+</ThemedText>
                     </Pressable>
                   </View>
                 </View>
@@ -244,13 +336,14 @@ export default function ProductDetailsScreen() {
                     accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                   >
                     <ThemedText style={[styles.webWishlistIcon, isWishlisted && styles.webWishlistIconActive]}>
-                      {isWishlisted ? "♥" : "♡"}
+                      {isWishlisted ? "♥" : <HeartIcon />}
                     </ThemedText>
                   </Pressable>
                 </View>
               </View>
             </View>
           </View>
+          <Footer/>
         </ScrollView>
       </View>
     )
@@ -307,43 +400,115 @@ export default function ProductDetailsScreen() {
             {product.description}
           </ThemedText>
 
+          {/* Color selection if available */}
+          {allColors.length > 0 && (
+            <View style={styles.mobileColorSection}>
+              <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
+                Color
+              </ThemedText>
+              <View style={styles.mobileColorOptions}>
+                {allColors.map((color) => (
+                  <Pressable
+                    key={color}
+                    style={[styles.mobileColorOption, selectedColor === color && styles.mobileColorOptionSelected]}
+                    onPress={() => setSelectedColor(color)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select color ${color}`}
+                  >
+                    <View style={[styles.mobileColorCircle, { backgroundColor: color.toLowerCase() }]} />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {allSizes.length > 0 && (
+            <View style={styles.mobileSizeSection}>
+              <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
+                Size
+              </ThemedText>
+              <View style={styles.mobileSizeOptions}>
+                {allSizes.map((size) => (
+                  <Pressable
+                    key={size}
+                    style={[styles.mobileSizeOption, selectedSize === size && styles.mobileSizeOptionSelected]}
+                    onPress={() => setSelectedSize(size)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select size ${size}`}
+                  >
+                    <ThemedText style={[styles.mobileSizeText, selectedSize === size && styles.mobileSizeTextSelected]}>
+                      {size}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
+
           <View style={styles.mobileQuantitySection}>
-            <ThemedText variant="text-base-semibold" style={styles.mobileQuantityLabel}>
+            <ThemedText variant="text-base-semibold" style={styles.mobileSectionLabel}>
               Quantity
             </ThemedText>
-            <View style={styles.mobileQuantityRow}>
-              <Pressable
-                onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                style={styles.mobileQuantityButton}
-                accessibilityRole="button"
-                accessibilityLabel="Decrease quantity"
-              >
-                <ThemedText variant="text-base-bold">−</ThemedText>
-              </Pressable>
-              <View style={styles.mobileQuantityDisplay}>
-                <ThemedText variant="text-base-regular">{quantity}</ThemedText>
+            <View style={styles.mobileQuantityContainer}>
+              <View style={styles.mobileQuantityInputWrapper}>
+                <TextInput
+                  value={quantity.toString()}
+                  onChangeText={(text) => {
+                    const num = Number.parseInt(text, 10)
+                    if (!isNaN(num) && num > 0) {
+                      setQuantity(num)
+                    } else if (text === "") {
+                      setQuantity(1)
+                    }
+                  }}
+                  keyboardType="numeric"
+                  style={styles.mobileQuantityInput}
+                  accessibilityLabel="Quantity"
+                />
+                <View style={styles.mobileQuantityArrows}>
+                  <Pressable
+                    onPress={() => setQuantity((q) => q + 1)}
+                    style={styles.mobileQuantityArrowButton}
+                    accessibilityRole="button"
+                    accessibilityLabel="Increase quantity"
+                  >
+                    <ThemedText style={styles.mobileQuantityArrowText}>▲</ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                    style={styles.mobileQuantityArrowButton}
+                    accessibilityRole="button"
+                    accessibilityLabel="Decrease quantity"
+                  >
+                    <ThemedText style={styles.mobileQuantityArrowText}>▼</ThemedText>
+                  </Pressable>
+                </View>
               </View>
-              <Pressable
-                onPress={() => setQuantity((q) => q + 1)}
-                style={styles.mobileQuantityButton}
-                accessibilityRole="button"
-                accessibilityLabel="Increase quantity"
-              >
-                <ThemedText variant="text-base-bold">+</ThemedText>
-              </Pressable>
             </View>
           </View>
 
-          <Pressable
-            onPress={handleAddToCart}
-            style={({ pressed }) => [styles.mobileAddToBagButton, pressed && { opacity: 0.9 }]}
-            accessibilityRole="button"
-            accessibilityLabel="Add to bag"
-          >
-            <ThemedText variant="text-base-bold" style={styles.mobileAddToBagText}>
-              Add to bag
-            </ThemedText>
-          </Pressable>
+          <View style={styles.mobileActionRow}>
+            <Pressable
+              onPress={handleAddToCart}
+              style={({ pressed }) => [styles.mobileAddToBagButton, pressed && { opacity: 0.9 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Add to bag"
+            >
+              <ThemedText variant="text-base-bold" style={styles.mobileAddToBagText}>
+                Add to bag
+              </ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={handleWishlistToggle}
+              style={styles.mobileWishlistButton}
+              accessibilityRole="button"
+              accessibilityLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <ThemedText style={[styles.mobileWishlistIcon, isWishlisted && styles.mobileWishlistIconActive]}>
+                {isWishlisted ? "♥" : <HeartIcon />}
+              </ThemedText>
+            </Pressable>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -402,13 +567,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft:50,
-    paddingRight:200
+    paddingLeft: 50,
+    paddingRight: 200,
+    paddingBottom:100,
   },
   webProductCard: {
     flexDirection: "row",
     backgroundColor: Colors.light.background,
-    justifyContent:"space-between",
+    justifyContent: "space-between",
     width: "100%",
     gap: 100,
     alignItems: "flex-start",
@@ -469,35 +635,122 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   webDescription: {
-  
     lineHeight: 24,
     color: Colors.light.gray600,
     textAlign: "left",
   },
-  webQuantitySection: {
-    gap: 12,
-  },
-  webQuantityLabel: {
+  webSectionLabel: {
     fontSize: 16,
     fontWeight: "600",
     color: Colors.light.text,
+    marginBottom: 12,
   },
-  webQuantityControls: {
-    alignItems: "flex-start",
-    gap: 4,
+  webColorSection: {
+    marginBottom: 8,
   },
-  webQuantityButton: {
+  webColorOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  webColorOption: {
+    padding: 4,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  webColorOptionSelected: {
+    borderColor: Colors.light.primary400,
+  },
+  webColorCircle: {
     width: 24,
     height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+  },
+  webSizeSection: {
+    marginBottom: 8,
+  },
+  webSizeOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  webSizeOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    backgroundColor: Colors.light.background,
+  },
+  webSizeOptionSelected: {
+    borderColor: Colors.light.primary400,
+    backgroundColor: Colors.light.primary50,
+  },
+  webSizeText: {
+    color: Colors.light.text,
+    fontSize: 14,
+  },
+  webSizeTextSelected: {
+    color: Colors.light.primary400,
+    fontWeight: "600",
+  },
+  webQuantitySection: {
+    marginBottom: 8,
+  },
+  webQuantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  webQuantityButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 4,
+    backgroundColor: Colors.light.background,
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.light.gray100,
-    borderRadius: 4,
   },
   webQuantityButtonText: {
-    fontSize: 12,
-    color: Colors.light.gray600,
+    fontSize: 18,
+    color: Colors.light.text,
     fontWeight: "600",
+  },
+  webQuantityInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    borderRadius: 4,
+    overflow: "hidden",
+    height: 36,
+  },
+  webQuantityInput: {
+    width: 40,
+    height: "100%",
+    textAlign: "center",
+    color: Colors.light.text,
+    fontSize: 16,
+    paddingHorizontal: 4,
+  },
+  webQuantityArrows: {
+    height: "100%",
+    borderLeftWidth: 1,
+    borderLeftColor: Colors.light.gray300,
+  },
+  webQuantityArrowButton: {
+    height: "50%",
+    width: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  webQuantityArrowText: {
+    fontSize: 10,
+    color: Colors.light.gray600,
   },
   webActionRow: {
     flexDirection: "row",
@@ -529,7 +782,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   webWishlistIcon: {
-    fontSize: 20,
+    fontSize: 25,
     color: Colors.light.gray600,
   },
   webWishlistIconActive: {
@@ -586,44 +839,137 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: Colors.light.gray600,
   },
-  mobileQuantitySection: {
-    gap: 12,
-  },
-  mobileQuantityLabel: {
+  mobileSectionLabel: {
     fontSize: 16,
     fontWeight: "600",
     color: Colors.light.text,
+    marginBottom: 12,
   },
-  mobileQuantityRow: {
+  mobileColorSection: {
+    marginBottom: 8,
+  },
+  mobileColorOptions: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     gap: 12,
   },
-  mobileQuantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.light.gray100,
+  mobileColorOption: {
+    padding: 4,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  mobileColorOptionSelected: {
+    borderColor: Colors.light.primary400,
+  },
+  mobileColorCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.light.gray300,
+  },
+  mobileSizeSection: {
+    marginBottom: 8,
+  },
+  mobileSizeOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  mobileSizeOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    backgroundColor: Colors.light.background,
+  },
+  mobileSizeOptionSelected: {
+    borderColor: Colors.light.primary400,
+    backgroundColor: Colors.light.primary50,
+  },
+  mobileSizeText: {
+    color: Colors.light.text,
+    fontSize: 14,
+  },
+  mobileSizeTextSelected: {
+    color: Colors.light.primary400,
+    fontWeight: "600",
+  },
+  mobileQuantitySection: {
+    marginBottom: 8,
+  },
+  mobileQuantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  mobileQuantityInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    borderRadius: 4,
+    overflow: "hidden",
+    height: 40,
+  },
+  mobileQuantityInput: {
+    width: 60,
+    height: "100%",
+    textAlign: "center",
+    color: Colors.light.text,
+    fontSize: 16,
+    paddingHorizontal: 4,
+  },
+  mobileQuantityArrows: {
+    height: "100%",
+    borderLeftWidth: 1,
+    borderLeftColor: Colors.light.gray300,
+  },
+  mobileQuantityArrowButton: {
+    height: "50%",
+    width: 24,
     alignItems: "center",
     justifyContent: "center",
   },
-  mobileQuantityDisplay: {
-    minWidth: 36,
+  mobileQuantityArrowText: {
+    fontSize: 10,
+    color: Colors.light.gray600,
+  },
+  mobileActionRow: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 12,
+    marginTop: 16,
   },
   mobileAddToBagButton: {
+    flex: 1,
     backgroundColor: Colors.light.primary400,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
-    marginTop: 12,
   },
   mobileAddToBagText: {
     color: Colors.light.background,
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.5,
+  },
+  mobileWishlistButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.gray300,
+    backgroundColor: Colors.light.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mobileWishlistIcon: {
+    fontSize: 25,
+    color: Colors.light.gray600,
+  },
+  mobileWishlistIconActive: {
+    color: Colors.light.error500,
   },
 })
