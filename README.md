@@ -27,6 +27,11 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - Android: `npm run android`
    - Web: `npm run web`
 
+4. **Running Tests**
+   ```bash
+   npm test
+   ```
+
 ## Architectural Decisions
 
 ### 1. Technology Stack
@@ -35,6 +40,7 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 - **Styling**: React Native StyleSheet with a custom theming system
 - **State Management**: React Context API with useReducer for cart functionality
 - **Image Handling**: Expo Image for optimized image loading and caching
+- **Testing**: Jest and React Native Testing Library
 
 ### 2. Project Structure
 ```
@@ -44,6 +50,7 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 │   └── ...            # Feature-specific components
 ├── constants/         # App constants and theme
 ├── services/          # API and business logic
+├── __tests__/        # Test files
 └── assets/           # Static assets
 ```
 
@@ -52,6 +59,12 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 - Optimized image loading with Expo Image
 - Responsive design for both mobile and web platforms
 - Efficient state management with Context API
+
+### 4. Lazy Loading Implementation
+- Each page is wrapped in a Suspense boundary
+- Custom LoadingScreen component for consistent loading states
+- Lazy loading configuration in Expo Router
+- Optimized initial bundle size
 
 ## State Management
 
@@ -70,6 +83,20 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 - Loading states for async operations
 - Graceful fallbacks for failed image loads
 
+## Testing Strategy
+
+### Unit Tests
+- Component testing with React Native Testing Library
+- Cart functionality testing
+- Form validation testing
+- State management testing
+
+### Test Configuration
+- Jest as the test runner
+- React Native Testing Library for component testing
+- Custom test utilities and mocks
+- CI/CD integration ready
+
 ## Known Limitations
 
 1. **State Persistence**
@@ -85,13 +112,21 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - No user authentication system
    - No wishlist persistence
 
+4. **Testing**
+   - Limited E2E test coverage
+   - No performance testing
+   - No visual regression testing
+
 ## Areas for Improvement
 
 1. **State Management**
+   - Implement persistent storage for cart data
    - Add user authentication and profile management
    - Implement wishlist functionality
 
 2. **Performance**
+   - Add image optimization for different screen sizes
+   - Implement caching for product data
    - Add offline support
 
 3. **Features**
@@ -99,4 +134,10 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - Implement product filtering and sorting
    - Add user reviews and ratings
    - Implement order tracking
+
+4. **Testing**
+   - Add performance testing
+   - Increase test coverage
+   - Unit tests
+
 
