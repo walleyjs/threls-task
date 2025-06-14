@@ -12,14 +12,14 @@ import { Colors } from "@/constants/Colors"
 import { getProducts, type Product } from "@/services/products"
 import { useEffect, useMemo, useState } from "react"
 import {
-         ActivityIndicator,
-         FlatList,
-         Platform,
-         Pressable,
-         ScrollView,
-         StyleSheet,
-         useWindowDimensions,
-         View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
 } from "react-native"
 
 export default function HomeScreen() {
@@ -30,8 +30,7 @@ export default function HomeScreen() {
   const [totalPages, setTotalPages] = useState(1)
   const [wishlistedItems, setWishlistedItems] = useState<Set<number>>(new Set())
   const { width } = useWindowDimensions()
-  const { state, dispatch } = useCart()
-  const cartCount = state.items.reduce((sum, item) => sum + item.quantity, 0)
+  const {  dispatch } = useCart()
 
   const getNumColumns = (w: number) => {
     if (Platform.OS === "web") {
@@ -43,7 +42,6 @@ export default function HomeScreen() {
   }
 
   const numColumns = useMemo(() => getNumColumns(width), [width])
-  const isWeb = Platform.OS === "web"
 
   const fetchProducts = (pageNum: number) => {
     setLoading(true)

@@ -103,9 +103,6 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - Cart state is not persisted between sessions
    - No offline support for cart data
 
-2. **Performance**
-   - Large product images may impact initial load time
-   - No image optimization for different screen sizes
 
 3. **Features**
    - Limited payment gateway integration
@@ -113,20 +110,15 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - No wishlist persistence
 
 4. **Testing**
-   - Limited E2E test coverage
-   - No performance testing
    - No visual regression testing
 
 ## Areas for Improvement
 
 1. **State Management**
-   - Implement persistent storage for cart data
    - Add user authentication and profile management
    - Implement wishlist functionality
 
 2. **Performance**
-   - Add image optimization for different screen sizes
-   - Implement caching for product data
    - Add offline support
 
 3. **Features**
@@ -135,9 +127,5 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - Add user reviews and ratings
    - Implement order tracking
 
-4. **Testing**
-   - Add performance testing
-   - Increase test coverage
-   - Unit tests
 
 

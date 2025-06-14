@@ -22,7 +22,6 @@ export const Header: React.FC<HeaderProps> = ({ style, ...rest }) => {
 
   return (
     <View style={[styles.header, isWide && styles.headerWide, style]} {...rest}>
-      {/* Left section - Products link on web, Logo on mobile */}
       <View style={styles.leftSection}>
         {isWide ? (
           <Pressable

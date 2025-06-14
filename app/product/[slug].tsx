@@ -34,8 +34,7 @@ export default function ProductDetailsScreen() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
-  const { dispatch, state } = useCart()
-  const cartCount = state.items.reduce((sum, item) => sum + item.quantity, 0)
+  const { dispatch } = useCart()
   const { width } = useWindowDimensions()
   const isWeb = Platform.OS === "web"
   const isWide = isWeb && width > 900
