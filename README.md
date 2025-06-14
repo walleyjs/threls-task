@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+# Threls E-commerce App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern e-commerce application built with React Native and Expo, featuring a responsive design for both mobile and web platforms.
 
-## Get started
+## Setup Instructions
 
-1. Install dependencies
+1. **Prerequisites**
+   - Node.js (v18 or higher)
+   - npm or yarn
+   - Expo CLI (`npm install -g expo-cli`)
 
+2. **Installation**
    ```bash
+   # Clone the repository
+   git clone [repository-url]
+   cd threls-task
+
+   # Install dependencies
    npm install
+
+   # Start the development server
+   npm start
    ```
 
-2. Start the app
+3. **Running the App**
+   - iOS: `npm run ios`
+   - Android: `npm run android`
+   - Web: `npm run web`
 
-   ```bash
-   npx expo start
-   ```
+## Architectural Decisions
 
-In the output, you'll find options to open the app in a
+### 1. Technology Stack
+- **Framework**: React Native with Expo for cross-platform development
+- **Navigation**: Expo Router for file-based routing
+- **Styling**: React Native StyleSheet with a custom theming system
+- **State Management**: React Context API with useReducer for cart functionality
+- **Image Handling**: Expo Image for optimized image loading and caching
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+### 2. Project Structure
+```
+├── app/                 # Main application screens
+├── components/         # Reusable components
+│   ├── ui/            # UI components
+│   └── ...            # Feature-specific components
+├── constants/         # App constants and theme
+├── services/          # API and business logic
+└── assets/           # Static assets
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 3. Performance Optimizations
+- Lazy loading for all pages using React Suspense
+- Optimized image loading with Expo Image
+- Responsive design for both mobile and web platforms
+- Efficient state management with Context API
 
-## Learn more
+## State Management
 
-To learn more about developing your project with Expo, look at the following resources:
+### Cart State
+- Implemented using React Context API and useReducer
+- Provides global cart state management
+- Actions:
+  - ADD_ITEM: Add product to cart
+  - REMOVE_ITEM: Remove product from cart
+  - UPDATE_QUANTITY: Update product quantity
+  - CLEAR_CART: Clear all items
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Error Handling
+- Form validation in checkout process
+- Error boundaries for component-level error handling
+- Loading states for async operations
+- Graceful fallbacks for failed image loads
 
-## Join the community
+## Known Limitations
 
-Join our community of developers creating universal apps.
+1. **State Persistence**
+   - Cart state is not persisted between sessions
+   - No offline support for cart data
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+2. **Performance**
+   - Large product images may impact initial load time
+   - No image optimization for different screen sizes
+
+3. **Features**
+   - Limited payment gateway integration
+   - No user authentication system
+   - No wishlist persistence
+
+## Areas for Improvement
+
+1. **State Management**
+   - Add user authentication and profile management
+   - Implement wishlist functionality
+
+2. **Performance**
+   - Add offline support
+
+3. **Features**
+   - Add search functionality
+   - Implement product filtering and sorting
+   - Add user reviews and ratings
+   - Implement order tracking
+
