@@ -40,11 +40,11 @@ export interface ProductVariant {
   vat_rate: { id: number; name: string; code: string; value: number };
   variant_type_options: ProductVariantTypeOption[];
   media: ProductMedia[];
-  inventory_items: Array<{
+  inventory_items: {
     id: string;
     location: { id: string; name: string };
     available_quantity: number;
-  }>;
+  }[];
   can_order_out_of_stock_items: boolean;
   created_at: string;
   updated_at: string;

@@ -3,19 +3,19 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Suspense } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { CartProvider } from '@/components/CartContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-function LoadingScreen() {
+const LoadingScreen: React.FC = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" />
     </View>
   );
-}
+};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -44,3 +44,11 @@ export default function RootLayout() {
     </CartProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
