@@ -5,9 +5,10 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 ## Setup Instructions
 
 1. **Prerequisites**
-   - Node.js (v18 or higher)
-   - npm or yarn
+   - Node.js (v22 or higher recommended)
+   - npm (v10 or higher)
    - Expo CLI (`npm install -g expo-cli`)
+   - Watchman (for file watching on macOS)
 
 2. **Installation**
    ```bash
@@ -32,6 +33,20 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    npm test
    ```
 
+5. **Troubleshooting**
+   If you encounter any issues:
+   ```bash
+   # Clear npm cache
+   npm cache clean --force
+
+   # Remove node_modules and reinstall
+   rm -rf node_modules
+   npm install
+
+   # Clear Watchman cache (if using macOS)
+   watchman watch-del-all
+   ```
+
 ## Architectural Decisions
 
 ### 1. Technology Stack
@@ -41,17 +56,23 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 - **State Management**: React Context API with useReducer for cart functionality
 - **Image Handling**: Expo Image for optimized image loading and caching
 - **Testing**: Jest and React Native Testing Library
+- **Icons**: Custom SVG icons with platform-specific implementations
 
 ### 2. Project Structure
 ```
 ├── app/                 # Main application screens
+│   ├── _layout.tsx     # Root layout configuration
+│   ├── index.tsx       # Home screen
+│   ├── cart.tsx        # Cart screen
+│   ├── checkout.tsx    # Checkout screen
+│   └── product/        # Product-related screens
 ├── components/         # Reusable components
-│   ├── ui/            # UI components
+│   ├── ui/            # UI components (icons, buttons, etc.)
 │   └── ...            # Feature-specific components
 ├── constants/         # App constants and theme
 ├── services/          # API and business logic
 ├── __tests__/        # Test files
-└── assets/           # Static assets
+└── assets/           # Static assets (images, fonts)
 ```
 
 ### 3. Performance Optimizations
@@ -59,6 +80,7 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 - Optimized image loading with Expo Image
 - Responsive design for both mobile and web platforms
 - Efficient state management with Context API
+- Platform-specific optimizations for iOS and Android
 
 ### 4. Lazy Loading Implementation
 - Each page is wrapped in a Suspense boundary
@@ -103,7 +125,6 @@ A modern e-commerce application built with React Native and Expo, featuring a re
    - Cart state is not persisted between sessions
    - No offline support for cart data
 
-
 3. **Features**
    - Limited payment gateway integration
    - No user authentication system
@@ -117,15 +138,24 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 1. **State Management**
    - Add user authentication and profile management
    - Implement wishlist functionality
+   - Add state persistence with AsyncStorage
 
 2. **Performance**
    - Add offline support
+   - Implement code splitting
+   - Optimize asset loading
 
 3. **Features**
    - Add search functionality
    - Implement product filtering and sorting
    - Add user reviews and ratings
    - Implement order tracking
+   - Add social sharing features
+
+4. **Testing**
+   - Add visual regression testing
+   - Implement end-to-end testing
+   - Add performance benchmarking
 
 
 

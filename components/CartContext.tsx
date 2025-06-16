@@ -1,5 +1,8 @@
 import { Product, ProductVariant } from '@/services/products';
-import React, { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext, Dispatch, ReactNode, useContext, useEffect, useReducer } from 'react';
+
+const CART_STORAGE_KEY = '@threls_cart';
 
 export interface CartItem {
   product: Product;
@@ -15,7 +18,8 @@ export type CartAction =
   | { type: 'ADD_ITEM'; product: Product; variant: ProductVariant; quantity: number }
   | { type: 'REMOVE_ITEM'; productId: number; variantId: number }
   | { type: 'UPDATE_QUANTITY'; productId: number; variantId: number; quantity: number }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'LOAD_CART'; items: CartItem[] };
 
 const initialState: CartState = {
   items: [],
@@ -60,6 +64,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       };
     case 'CLEAR_CART':
       return initialState;
+    case 'LOAD_CART':
+      return {
+        ...state,
+        items: action.items,
+      };
     default:
       return state;
   }
@@ -72,6 +81,35 @@ const CartContext = createContext<{
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const savedCart = await AsyncStorage.getItem(CART_STORAGE_KEY);
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          dispatch({ type: 'LOAD_CART', items: parsedCart });
+        }
+      } catch (error) {
+        console.error('Error loading cart from storage:', error);
+      }
+    };
+
+    loadCart();
+  }, []);
+
+  useEffect(() => {
+    const saveCart = async () => {
+      try {
+        await AsyncStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
+      } catch (error) {
+        console.error('Error saving cart to storage:', error);
+      }
+    };
+
+    saveCart();
+  }, [state.items]);
+
   return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>;
 }
 
