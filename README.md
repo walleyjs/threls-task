@@ -121,10 +121,6 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 
 ## Known Limitations
 
-1. **State Persistence**
-   - Cart state is not persisted between sessions
-   - No offline support for cart data
-
 3. **Features**
    - Limited payment gateway integration
    - No user authentication system
@@ -138,12 +134,9 @@ A modern e-commerce application built with React Native and Expo, featuring a re
 1. **State Management**
    - Add user authentication and profile management
    - Implement wishlist functionality
-   - Add state persistence with AsyncStorage
 
 2. **Performance**
    - Add offline support
-   - Implement code splitting
-   - Optimize asset loading
 
 3. **Features**
    - Add search functionality
